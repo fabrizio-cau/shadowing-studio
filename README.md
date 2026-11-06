@@ -19,9 +19,11 @@ practice library. No account, no cloud: recordings stay on your computer.
     recording ends.
   - *Listen & repeat*: *Listen* plays the segment once and pauses; then *Record* your imitation;
     *Listen again* for the next try.
-- **Attempts**: unlimited independent recordings per segment, each with attempt number, date, time and
-  duration. You can rename them, add notes, delete them and play them; *Play original* replays the
-  YouTube segment so you can compare by ear.
+- **Attempts**: unlimited independent recordings per segment. Segments and attempts show the same kind
+  of details: index, length and date/time (segments also show their times and number of attempts). You
+  can rename attempts, add notes, delete them and play them (a play bar shows while one plays); *Play
+  original* replays the YouTube segment so you can compare by ear. Segments can be deleted, with their
+  attempts, from the Recordings tab or the Library.
 - **Library**: organised by Language → Video → Segment (languages and videos in alphabetical order,
   segments without a language last under *Unsorted*; segments in the order they were created, #1, #2…), with language and video filters. *Practice*
   reopens the video at the segment and restores it.
@@ -149,11 +151,11 @@ a REC badge on the toolbar icon show it is active.
 - `filename.test.ts`: sanitisation, reserved names, export paths, de-duplication, `info.json`.
 
 `npm run test:e2e` drives your installed Chrome (via `playwright-core`; no browser download) against a real
-YouTube video with Chrome's **fake microphone**. It runs 41 checks, all passing on the last run: install,
+YouTube video with Chrome's **fake microphone**. It runs 45 checks, all passing on the last run: install,
 connect, timestamps, loop bounds at 0.5×/1×/2×, loop off, REC badge, shadowing auto-stop, listen & repeat
-pause and record, decoded WebM/Opus audio with a duration header, playback, rename, attempt highlighting, play original, toasts, export folder
+pause and record, decoded WebM/Opus audio with a duration header, playback, rename, attempt highlighting, play bar, play original, toasts, export folder
 structure, delete, SPA navigation, no console errors, **library and recordings after restarting Chrome**,
-and reopening a segment from the library. It handles YouTube's EU cookie dialog by declining non-essential
+reopening a segment from the library and deleting a segment. It handles YouTube's EU cookie dialog by declining non-essential
 cookies. Set `E2E_HEADED=1` to watch it run, or `E2E_SHOTS=<dir>` to save screenshots.
 
 The e2e run cannot cover the following: the real side panel (automation cannot click the toolbar icon, so
@@ -180,8 +182,9 @@ Run this once per release in a normal Chrome profile:
    the toolbar badge all show; it stops at the segment end. Record a second attempt: both are listed.
 7. **Listen & repeat**: *Listen*: it pauses at the end and shows *Your turn*. *Record*, speak, *Stop
    recording*. *Listen again* works.
-8. **Recordings**: play, pause, rename, add notes, *Play original*, delete (two clicks). Older attempts are
-   unaffected.
+8. **Recordings**: play (the play bar shows only while playing), pause, rename, add notes, *Play original*,
+   delete (two clicks). Older attempts are unaffected. Deleting the segment (two clicks) removes it and its
+   attempts.
 9. **Interruptions**: start recording and close the side panel. Reopen it: *Recovered 1 recording*. Start
    recording and unplug the microphone: recording stops, and the audio so far is saved with a message.
 10. **Navigation**: click a recommended video. The panel follows it and the segment resets; the previous

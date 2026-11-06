@@ -1,10 +1,8 @@
 import { useEffect, useState } from 'react';
-import { formatClock, formatSegmentLength } from '../../shared/time';
+import { formatClock, formatDateTime, formatSegmentLength } from '../../shared/time';
 import { watchUrl, type Recording, type Segment } from '../../shared/types';
 import type { AttemptPlayer } from '../hooks';
 import { Card, ConfirmButton, Empty, Icon } from './ui';
-
-const formatShortDateTime = (epochMs: number) => new Date(epochMs).toLocaleString(undefined, { dateStyle: 'short', timeStyle: 'short' });
 
 export interface RecordingsViewProps {
   segment: Segment | null;
@@ -14,6 +12,7 @@ export interface RecordingsViewProps {
   busy: boolean;
   onPlayOriginal: () => void;
   onDelete: (recording: Recording) => void;
+  onDeleteSegment: (segment: Segment) => void;
   onUpdate: (recording: Recording, patch: { name?: string; notes?: string }) => void;
   onExport: (recordings: Recording[]) => void;
   onGoToPractice: () => void;
@@ -64,13 +63,18 @@ export function RecordingsView(p: RecordingsViewProps) {
                     {formatClock(seg.start)} – {formatClock(seg.end)}
                   </span>
                 </div>
-                <div className="subtle">
-                  {formatSegmentLength(seg.end - seg.start)} · {n} attempt{n === 1 ? '' : 's'} · {seg.language || 'Unsorted'}
+                <div className="subtle meta">
+                  <span>{formatSegmentLength(seg.end - seg.start)}</span>
+                  <span>
+                    {n} attempt{n === 1 ? '' : 's'}
+                  </span>
+                  <span>{formatDateTime(seg.createdAt)}</span>
                 </div>
               </div>
               <button type="button" className="btn btn-sm btn-primary" onClick={p.onPlayOriginal} disabled={!p.canControlVideo || p.busy} title={p.canControlVideo ? undefined : 'Open this video to play the original'}>
                 <Icon name="play" /> Play original
               </button>
+              <ConfirmButton small label={`Delete segment ${seg.number} and its recordings`} confirmLabel="Delete" onConfirm={() => p.onDeleteSegment(seg)} disabled={p.busy} />
             </div>
             {!p.canControlVideo && <p className="hint">Open this segment's video to play the original.</p>}
           </div>
@@ -122,7 +126,7 @@ function AttemptRow({ recording: r, player, busy, onDelete, onUpdate, onExport, 
             <input
               className="name-input"
               value={name}
-              placeholder="Add a name…"
+              placeholder="e.g. Best so far"
               aria-label={`Name of ${title}`}
               maxLength={80}
               onChange={(e) => setName(e.target.value)}
@@ -130,9 +134,9 @@ function AttemptRow({ recording: r, player, busy, onDelete, onUpdate, onExport, 
               onKeyDown={(e) => e.key === 'Enter' && (e.target as HTMLInputElement).blur()}
             />
           </div>
-          <div className="subtle attempt-meta">
-            <span>{formatShortDateTime(r.createdAt)}</span>
-            <span className="mono">{formatClock(duration)}</span>
+          <div className="subtle meta">
+            <span>{formatSegmentLength(duration)}</span>
+            <span>{formatDateTime(r.createdAt)}</span>
             {r.recovered && <span>recovered</span>}
           </div>
         </div>
@@ -147,7 +151,7 @@ function AttemptRow({ recording: r, player, busy, onDelete, onUpdate, onExport, 
         </button>
         <ConfirmButton small label={`Delete ${title}`} confirmLabel="Delete" onConfirm={() => onDelete(r)} disabled={busy} />
       </div>
-      {isCurrent && duration > 0 && (
+      {isPlaying && duration > 0 && (
         <div className="row nowrap">
           <div className="progress grow" aria-hidden>
             <span style={{ width: `${(position / duration) * 100}%` }} />

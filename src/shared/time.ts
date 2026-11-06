@@ -66,3 +66,8 @@ export function formatSegmentLength(seconds: number): string {
 function pad(n: number, width: number): string {
   return String(n).padStart(width, '0');
 }
+
+/** Short local date and time (e.g. `06/11/2026, 14:05`), used for both segments and attempts. */
+export function formatDateTime(epochMs: number): string {
+  return new Date(epochMs).toLocaleString(undefined, { dateStyle: 'short', timeStyle: 'short' });
+}

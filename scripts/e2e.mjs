@@ -191,10 +191,13 @@ try {
   const indexes = await rows.locator('.seg-num').allTextContents();
   check('Attempts show their index, newest first', indexes.join(',') === '#3,#2,#1', indexes.join(','));
   check('No attempt is tinted as "just saved"', (await panel.locator('[role=listitem].highlight').count()) === 0);
+  check('No play bar is shown while nothing plays', (await panel.locator('[role=listitem] .progress').count()) === 0);
   await panel.getByRole('button', { name: 'Play Attempt 1' }).click();
   await panel.getByRole('button', { name: 'Pause Attempt 1' }).waitFor({ timeout: 5000 });
+  check('The play bar appears on the playing attempt', (await rows.last().locator('.progress').count()) === 1);
   await panel.getByRole('button', { name: 'Play Attempt 1' }).waitFor({ timeout: 10_000 });
   check('Attempt playback plays to the end', true);
+  check('The play bar hides again when playback ends', (await panel.locator('[role=listitem] .progress').count()) === 0);
   await panel.getByLabel('Name of Attempt 2').fill('Better rhythm');
   await panel.getByLabel('Name of Attempt 2').press('Enter');
   // The list shows the newest attempt first, so the last row is attempt 1.
@@ -245,7 +248,7 @@ try {
   await panel.getByLabel('Stop automatically at the end of the segment').check();
   // Remove that extra attempt so later checks keep their counts.
   await panel.getByRole('tab', { name: /Recordings/ }).click();
-  await panel.getByRole('button', { name: /^Delete / }).first().click();
+  await panel.getByRole('button', { name: /^Delete Attempt / }).first().click();
   await panel.getByRole('button', { name: 'Delete', exact: true }).click();
   await panel.waitForFunction(() => document.querySelectorAll('[role=listitem]').length === 2);
 
@@ -289,6 +292,13 @@ try {
     const t = await ytTab.evaluate(() => document.querySelector('video.html5-main-video').currentTime);
     check('Video is positioned at the segment start', t >= 1.9 && t < 5.1, `t=${t.toFixed(2)}`);
   }
+  // Delete the segment itself from the Recordings tab (two clicks: arm, confirm).
+  await panel2.getByRole('tab', { name: /Recordings/ }).click();
+  await panel2.getByRole('button', { name: 'Delete segment 1 and its recordings' }).click();
+  await panel2.getByRole('button', { name: 'Delete', exact: true }).click();
+  await panel2.getByText('No segment selected').waitFor({ timeout: 5000 });
+  db = await readDb(panel2);
+  check('Deleting a segment removes it and its attempts', db.recordings.length === 0 && db.segments.length === 0, JSON.stringify({ r: db.recordings.length, s: db.segments.length }));
   check('No console errors after restart', consoleErrors.length === 0, consoleErrors.join(' | '));
   await ctx.close();
 } catch (err) {

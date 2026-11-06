@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
-import { formatClock, formatSegmentLength } from '../../shared/time';
+import { formatClock, formatDateTime, formatSegmentLength } from '../../shared/time';
 import { watchUrl, type Segment } from '../../shared/types';
 import type { ShadowingStore } from '../../storage/db';
 import { Banner, Card, ConfirmButton, Empty, formatBytes, Icon } from './ui';
@@ -158,8 +158,12 @@ export function LibraryView(p: LibraryViewProps) {
                             {formatClock(s.start)} – {formatClock(s.end)}
                           </span>
                         </div>
-                        <div className="subtle">
-                          {formatSegmentLength(s.end - s.start)} · {n} attempt{n === 1 ? '' : 's'} · {new Date(s.createdAt).toLocaleDateString()}
+                        <div className="subtle meta">
+                          <span>{formatSegmentLength(s.end - s.start)}</span>
+                          <span>
+                            {n} attempt{n === 1 ? '' : 's'}
+                          </span>
+                          <span>{formatDateTime(s.createdAt)}</span>
                         </div>
                       </div>
                       <button type="button" className="btn btn-sm btn-primary" onClick={() => p.onResume(s)}>

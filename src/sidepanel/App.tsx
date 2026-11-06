@@ -615,6 +615,10 @@ export function App() {
               send({ type: 'playSegment', mode: 'once' });
             }}
             onDelete={(r) => void deleteRecording(r)}
+            onDeleteSegment={(seg) => {
+              attemptPlayer.stop();
+              void deleteSegment(seg);
+            }}
             onUpdate={(r, patch) => void updateRecording(r, patch)}
             onExport={(recs) => saved && void exportItems(recs.map((recording) => ({ segment: saved, recording })))}
             onGoToPractice={() => setTab('practice')}

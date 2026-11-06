@@ -44,6 +44,7 @@ YOUR PRACTICE LIBRARY
 • Segments are organised by language and video.
 • Return to any saved sentence later: one click reopens the video at the right spot.
 • Rename attempts and add notes on what to improve.
+• Delete segments and attempts you no longer need.
 • Export recordings as audio files, neatly organised in folders, to keep or share with a teacher.
 
 PRIVATE BY DESIGN
