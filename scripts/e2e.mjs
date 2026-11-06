@@ -5,27 +5,15 @@
 // Env: CHROME_PATH (default: standard Windows/macOS/Linux install), E2E_VIDEO (default jNQXAC9IVRw),
 //      E2E_HEADED=1 to watch it run.
 //
-// Branded Chrome ≥137 ignores --load-extension, so the extension is loaded through the CDP
-// `Extensions.loadUnpacked` method (needs --enable-unsafe-extension-debugging). The side panel
-// page is opened as a normal tab pinned to the YouTube tab via `?tabId=` because automation
-// cannot click the toolbar button. Chrome's fake media device stands in for the microphone.
-import { existsSync, mkdirSync, mkdtempSync, readdirSync, rmSync, statSync, writeFileSync } from 'node:fs';
+// The Chrome harness (extension loading, consent, panel window) lives in scripts/harness.mjs.
+import { mkdtempSync, readdirSync, rmSync, statSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import path from 'node:path';
-import { chromium } from 'playwright-core';
+import * as harness from './harness.mjs';
+import { field, openYouTube, waitVideo } from './harness.mjs';
 
-const DIST = path.resolve('dist');
 const VIDEO = process.env.E2E_VIDEO ?? 'jNQXAC9IVRw';
-const CHROME =
-  process.env.CHROME_PATH ??
-  [
-    'C:/Program Files/Google/Chrome/Application/chrome.exe',
-    '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome',
-    '/usr/bin/google-chrome',
-  ].find((p) => existsSync(p));
-
-if (!existsSync(path.join(DIST, 'manifest.json'))) throw new Error('Run `npm run build` first.');
-if (!CHROME) throw new Error('Chrome not found; set CHROME_PATH.');
+harness.assertReady();
 
 const profile = mkdtempSync(path.join(tmpdir(), 'yss-e2e-profile-'));
 const downloads = mkdtempSync(path.join(tmpdir(), 'yss-e2e-downloads-'));
@@ -41,91 +29,12 @@ function check(name, ok, detail = '') {
 }
 
 async function launch() {
-  // CDP download overrides rename files to GUIDs, so instead point the profile's own download
-  // directory at a temp folder and let Chrome behave normally (honouring the extension's paths).
-  const prefs = path.join(profile, 'Default', 'Preferences');
-  if (!existsSync(prefs)) {
-    mkdirSync(path.dirname(prefs), { recursive: true });
-    writeFileSync(prefs, JSON.stringify({ download: { default_directory: downloads, prompt_for_download: false } }));
-  }
-  const ctx = await chromium.launchPersistentContext(profile, {
-    executablePath: CHROME,
-    headless: !process.env.E2E_HEADED,
-    locale: 'en-US',
-    viewport: { width: 1280, height: 800 },
-    acceptDownloads: false,
-    ignoreDefaultArgs: ['--disable-extensions'],
-    args: [
-      '--enable-unsafe-extension-debugging',
-      '--use-fake-device-for-media-stream',
-      '--use-fake-ui-for-media-stream',
-      '--autoplay-policy=no-user-gesture-required',
-    ],
-  });
-  current = ctx;
-  const cdp = await ctx.browser().newBrowserCDPSession();
-  const { id } = await cdp.send('Extensions.loadUnpacked', { path: DIST });
-  await cdp.send('Browser.setDownloadBehavior', { behavior: 'default' });
-  return { ctx, id };
+  const launched = await harness.launch({ profile, downloads, headed: !!process.env.E2E_HEADED });
+  current = launched.ctx;
+  return launched;
 }
 
-async function openYouTube(ctx, url) {
-  const page = await ctx.newPage();
-  await page.goto(url, { waitUntil: 'domcontentloaded' });
-  if (page.url().includes('consent.')) {
-    // Decline non-essential cookies.
-    await page.getByRole('button', { name: /reject all/i }).first().click();
-    await page.waitForURL(/youtube\.com\/(watch|$)/);
-  }
-  return page;
-}
-
-/**
- * Waits until the main video has metadata, no ad is showing and the cookie dialog is gone.
- * EU visitors get an in-page consent dialog (sometimes several seconds late) that keeps the
- * player paused until answered; we decline non-essential cookies.
- */
-async function waitVideo(page) {
-  const reject = page.locator('button:has-text("Reject all"), button[aria-label^="Reject"]').first();
-  let answered = false;
-  for (let i = 0; i < 120; i++) {
-    // Click once: a second click on the closing dialog can land on a recommended video behind it.
-    if (!answered && (await reject.isVisible().catch(() => false))) {
-      answered = true;
-      await reject.click({ timeout: 3000 }).catch(() => undefined);
-    }
-    const ready = await page.evaluate(() => {
-      const v = document.querySelector('video.html5-main-video');
-      return !!v && v.readyState >= 1 && Number.isFinite(v.duration) && !document.querySelector('.ad-showing');
-    }).catch(() => false);
-    if (process.env.E2E_DEBUG) console.log('wait', i, ready, await page.evaluate(() => { const v = document.querySelector('video.html5-main-video'); return `${location.search} t=${v?.currentTime.toFixed(1)} d=${v?.duration} ad=${!!document.querySelector('.ad-showing')}`; }).catch((e) => e.message.slice(0, 60)));
-    // Hold the (short) clip at the start so YouTube does not autoplay the next video meanwhile.
-    if (ready) await page.evaluate(() => { const v = document.querySelector('video.html5-main-video'); v.pause(); if (v.currentTime > 1) v.currentTime = 0; }).catch(() => undefined);
-    if (ready && i >= 16) return; // give a late consent dialog ~8 s to appear
-    await page.waitForTimeout(500);
-  }
-  const why = await page.evaluate(() => { const v = document.querySelector('video.html5-main-video'); return JSON.stringify({ found: !!v, rs: v?.readyState, d: v?.duration, t: v?.currentTime, ad: !!document.querySelector('.ad-showing'), url: location.href }); });
-  throw new Error(`The YouTube video did not become ready: ${why}`);
-}
-
-async function openPanel(ctx, id, ytUrlPrefix = 'https://www.youtube.com/*') {
-  const panel = await ctx.newPage();
-  panel.on('console', (m) => m.type() === 'error' && consoleErrors.push(`panel: ${m.text()}`));
-  panel.on('pageerror', (e) => consoleErrors.push(`panel exception: ${e.message}`));
-  await panel.goto(`chrome-extension://${id}/permission/index.html`);
-  const tabId = await panel.evaluate(async (pattern) => (await chrome.tabs.query({ url: pattern }))[0]?.id, ytUrlPrefix);
-  // A separate window keeps the YouTube tab visible, as it is next to a real side panel
-  // (Chrome throttles media in hidden tabs).
-  const opened = ctx.waitForEvent('page');
-  await panel.evaluate((url) => chrome.windows.create({ url, width: 420, height: 900 }), `chrome-extension://${id}/sidepanel/index.html?tabId=${tabId}`);
-  const real = await opened;
-  real.on('console', (m) => m.type() === 'error' && consoleErrors.push(`panel: ${m.text()}`));
-  real.on('pageerror', (e) => consoleErrors.push(`panel exception: ${e.message}`));
-  await real.waitForLoadState();
-  await real.setViewportSize({ width: 400, height: 900 });
-  await panel.close();
-  return real;
-}
+const openPanel = (ctx, id) => harness.openPanel(ctx, id, { onError: (e) => consoleErrors.push(e) });
 
 /** Samples video.currentTime for `ms`; returns min, max and how many times it jumped backwards. */
 async function sample(page, ms) {
@@ -146,7 +55,6 @@ async function sample(page, ms) {
   }, ms);
 }
 
-const field = (panel, label) => panel.locator(`label.field:has(.field-label:text-is("${label}")) input`).first();
 
 async function readDb(panel) {
   return panel.evaluate(async () => {

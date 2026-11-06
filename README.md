@@ -1,4 +1,4 @@
-# YouTube Shadowing Studio
+# Shadowing Studio for YouTube
 
 A Chrome extension for **shadowing practice** on YouTube. Pick a sentence, loop it, record yourself
 speaking along (or after it), compare your attempts with the original, and keep everything in a local
@@ -57,6 +57,8 @@ YouTube tabs that were already open before you installed or reloaded the extensi
 | `npm run typecheck` | TypeScript, strict. |
 | `npm test` | Unit and integration tests (Vitest, jsdom, fake-indexeddb). |
 | `npm run test:e2e` | End-to-end run in real Chrome against real YouTube (see below). Build first. |
+| `npm run package` | Production build, zipped for the Chrome Web Store: `release/shadowing-studio-<version>.zip`. |
+| `npm run store-assets` | Regenerates the store screenshots and promo tiles in `store/` from a real session (build first). |
 | `npm run icons` | Regenerates `public/icons/*.png`. |
 
 **Stack**: TypeScript, React 19, Vite 8, Manifest V3, IndexedDB via [`idb`](https://github.com/jakearchibald/idb),
@@ -75,10 +77,18 @@ src/
   storage/     IndexedDB schema, migrations, repository
   shared/      message contracts, timestamps, validation, file names
 tests/         Vitest suites
-scripts/       build, e2e, icon generation
+scripts/       build, package, e2e + store assets (shared Chrome harness), icons
+store/         Chrome Web Store listing text and graphics
 ```
 
 See [ARCHITECTURE.md](ARCHITECTURE.md) for the design, data flow and trade-offs.
+
+## Publishing to the Chrome Web Store
+
+[`store/LISTING.md`](store/LISTING.md) has everything the Developer Dashboard asks for: the listing text,
+the single-purpose statement, a justification for each permission, the data-usage answers and a
+pre-submit checklist. The privacy policy is [`PRIVACY.md`](PRIVACY.md), and the screenshots and promo
+tiles are in `store/`. To publish: `npm run package`, then upload the zip.
 
 ## Permissions
 

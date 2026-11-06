@@ -1,4 +1,4 @@
-# YouTube Shadowing Studio — Architecture
+# Shadowing Studio for YouTube — Architecture
 
 ## Goals and constraints
 
