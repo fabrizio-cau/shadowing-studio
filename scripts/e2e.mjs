@@ -183,7 +183,7 @@ try {
   check('No leftover drafts', db.drafts === 0);
 
   await shot(panel, '01-practice-repeat');
-  // Recordings tab: playback, rename, compare.
+  // Recordings tab: playback, rename, selection, original.
   await panel.getByRole('tab', { name: /Recordings/ }).click();
   const rows = panel.locator('[role=listitem]');
   check('Recordings tab lists all attempts', (await rows.count()) === 3);
@@ -193,10 +193,15 @@ try {
   check('Attempt playback plays to the end', true);
   await panel.getByLabel('Name of Attempt 2').fill('Better rhythm');
   await panel.getByLabel('Name of Attempt 2').press('Enter');
-  await panel.getByRole('button', { name: 'Compare' }).first().click();
-  await panel.getByRole('button', { name: /Pause Attempt 3/ }).waitFor({ timeout: 10_000 });
-  check('Compare plays the original, then the attempt', true);
-  await panel.getByRole('button', { name: /Pause Attempt 3/ }).click();
+  // The list shows the newest attempt first, so the last row is attempt 1.
+  await rows.last().getByRole('button', { name: 'Notes' }).click();
+  const selected = await panel.locator('.list-item.selected').count();
+  check('Interacting with an attempt (Notes) highlights it alone', selected === 1 && (await rows.last().evaluate((el) => el.classList.contains('selected'))), `${selected} highlighted`);
+  await panel.getByRole('button', { name: 'Play original' }).click();
+  await yt.waitForFunction(() => !document.querySelector('video.html5-main-video').paused, null, { timeout: 10_000 });
+  await yt.waitForFunction(() => document.querySelector('video.html5-main-video').paused, null, { timeout: 10_000 });
+  const originalEnd = await yt.evaluate(() => document.querySelector('video.html5-main-video').currentTime);
+  check('Play original plays the segment once and stops at its end', originalEnd >= 4.9 && originalEnd <= 5.2, `t=${originalEnd.toFixed(2)}`);
 
   await shot(panel, '02-recordings');
   // Export.

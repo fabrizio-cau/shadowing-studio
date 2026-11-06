@@ -35,7 +35,7 @@ const store = new ShadowingStore();
 const fixDuration: FixDuration = (blob, ms) => fixWebmDuration(blob, ms, { logger: false });
 /** Crash recovery runs once per panel document (StrictMode mounts effects twice in development). */
 let recovery: Promise<Recording[]> | null = null;
-const TOAST_MS = 3000;
+const TOAST_MS = 2000;
 const EMPTY_WORKSPACE: Workspace = { videoId: null, segmentId: null, startText: '', endText: '' };
 
 /** `?tabId=N` pins the panel to one tab. Only used when the panel page is opened as a tab by automated tests. */
@@ -70,7 +70,6 @@ export function App() {
   const [toastHovered, setToastHovered] = useState(false);
   const [unsaved, setUnsaved] = useState<{ blob: Blob; mimeType: string } | null>(null);
   const [highlightId, setHighlightId] = useState<string | null>(null);
-  const [comparingId, setComparingId] = useState<string | null>(null);
   const [libraryVersion, bumpLibrary] = useReducer((x: number) => x + 1, 0);
 
   const connRef = useRef<PlayerConnection | null>(null);
@@ -117,12 +116,10 @@ export function App() {
   const onCurrentVideo = !!player && connection.kind === 'connected' && player.status.kind === 'ready' && player.videoId === ws.videoId;
 
   // Values the long-lived callbacks (port events, recorder) need at call time.
-  const live = useRef({ player, settings, phase, comparingId, recordings, onSaved: (_r: Recording) => {} });
+  const live = useRef({ player, settings, phase, onSaved: (_r: Recording) => {} });
   live.current.player = player;
   live.current.settings = settings;
   live.current.phase = phase;
-  live.current.comparingId = comparingId;
-  live.current.recordings = recordings;
 
   const refreshVideoSegments = useCallback(async (videoId: string | null) => {
     setVideoSegments(videoId ? await store.listSegmentsForVideo(videoId) : []);
@@ -140,7 +137,7 @@ export function App() {
     if (live.current.settings.mode === 'repeat') setPhase('done');
   };
 
-  // Notices disappear after 3 s (paused while hovered). Ones with a button stay until used or dismissed.
+  // Notices disappear after 2 s (paused while hovered). Ones with a button stay until used or dismissed.
   useEffect(() => {
     if (!notice) {
       // The region collapses when empty, so mouseleave may never fire: reset the hover state.
@@ -198,16 +195,7 @@ export function App() {
         send({ type: 'pause' });
         void recorder.stop();
       }
-      if (e.mode === 'once') {
-        const compareId = live.current.comparingId;
-        if (compareId) {
-          setComparingId(null);
-          const rec = live.current.recordings.find((r) => r.id === compareId);
-          if (rec) attemptPlayer.play(rec);
-        } else if (live.current.phase === 'listening') {
-          setPhase('your-turn');
-        }
-      }
+      if (e.mode === 'once' && live.current.phase === 'listening') setPhase('your-turn');
     }
   };
 
@@ -219,7 +207,6 @@ export function App() {
     const pending = pendingRef.current;
     attemptPlayer.stop();
     setPhase('idle');
-    setComparingId(null);
     if (pending && pending.videoId === playerVideoId) {
       loadSegment(pending);
     } else {
@@ -318,7 +305,6 @@ export function App() {
       return;
     }
     attemptPlayer.stop();
-    setComparingId(null);
     const shadowing = settings.mode === 'shadowing';
     if (!shadowing) send({ type: 'pause' });
     try {
@@ -368,7 +354,6 @@ export function App() {
   function listen() {
     if (!bounds) return;
     attemptPlayer.stop();
-    setComparingId(null);
     setPhase('listening');
     send({ type: 'playSegment', mode: 'once' });
   }
@@ -400,13 +385,6 @@ export function App() {
   function setEndText(text: string) {
     setWs((w) => ({ ...w, endText: text }));
     setPhase('idle');
-  }
-
-  function compare(rec: Recording) {
-    if (!bounds) return;
-    attemptPlayer.stop();
-    setComparingId(rec.id);
-    send({ type: 'playSegment', mode: 'once' });
   }
 
   async function deleteRecording(rec: Recording) {
@@ -624,14 +602,12 @@ export function App() {
             recordings={recordings}
             player={attemptPlayer}
             highlightId={highlightId}
-            comparingId={comparingId}
             canControlVideo={onCurrentVideo && !!bounds}
             busy={recStatus !== 'idle'}
             onPlayOriginal={() => {
               attemptPlayer.stop();
               send({ type: 'playSegment', mode: 'once' });
             }}
-            onCompare={compare}
             onDelete={(r) => void deleteRecording(r)}
             onUpdate={(r, patch) => void updateRecording(r, patch)}
             onExport={(recs) => saved && void exportItems(recs.map((recording) => ({ segment: saved, recording })))}

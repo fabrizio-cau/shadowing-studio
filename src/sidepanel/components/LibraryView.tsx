@@ -17,6 +17,14 @@ export interface LibraryViewProps {
 /** Segments saved without a language; the same label export folders use. */
 const languageLabel = (language: string) => language || 'Unsorted';
 
+/** Alphabetical, ignoring case and accents; segments without a language (Unsorted) always last. */
+function byLanguage(a: string, b: string): number {
+  if (!a || !b) return Number(!a) - Number(!b);
+  return a.localeCompare(b, undefined, { sensitivity: 'base' });
+}
+
+const byTitle = (a: string, b: string) => a.localeCompare(b, undefined, { sensitivity: 'base' });
+
 interface VideoGroup {
   videoId: string;
   title: string;
@@ -52,7 +60,7 @@ export function LibraryView(p: LibraryViewProps) {
     };
   }, [p.store, p.version]);
 
-  const languages = useMemo(() => [...new Set((segments ?? []).map((s) => s.language))].sort((a, b) => a.localeCompare(b)), [segments]);
+  const languages = useMemo(() => [...new Set((segments ?? []).map((s) => s.language))].sort(byLanguage), [segments]);
 
   const tree = useMemo(() => {
     const byLang = new Map<string, Map<string, VideoGroup>>();
@@ -66,19 +74,19 @@ export function LibraryView(p: LibraryViewProps) {
       videos.set(s.videoId, g);
     }
     return [...byLang.entries()]
-      .sort(([a], [b]) => a.localeCompare(b))
+      .sort(([a], [b]) => byLanguage(a, b))
       .map(([lang, videos]) => ({
         language: lang,
         videos: [...videos.values()]
           .map((v) => ({ ...v, segments: v.segments.sort((a, b) => a.start - b.start) }))
-          .sort((a, b) => Math.max(...b.segments.map((s) => s.updatedAt)) - Math.max(...a.segments.map((s) => s.updatedAt))),
+          .sort((a, b) => byTitle(a.title, b.title)),
       }));
   }, [segments, language, videoId]);
 
   const videoOptions = useMemo(() => {
     const m = new Map<string, string>();
     for (const s of segments ?? []) if (language === 'all' || s.language === language) m.set(s.videoId, s.videoTitle || s.videoId);
-    return [...m.entries()].sort((a, b) => a[1].localeCompare(b[1]));
+    return [...m.entries()].sort((a, b) => byTitle(a[1], b[1]));
   }, [segments, language]);
 
   if (error) return <Banner tone="error">{error}</Banner>;

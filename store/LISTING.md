@@ -34,7 +34,7 @@ HOW IT WORKS
 2. Mark the start and end of a sentence with one click each (or type times like 00:01:23).
 3. Turn on Loop. The sentence repeats seamlessly, at any playback speed.
 4. Record your attempt. Do it again. Every attempt is kept.
-5. Play your attempts back, or press Compare to hear the original followed by your version.
+5. Play the original sentence and your attempts back to compare them by ear.
 
 TWO PRACTICE MODES
 • Shadowing: speak along with the speaker while the sentence loops. Each attempt stops automatically when the sentence ends.

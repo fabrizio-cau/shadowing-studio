@@ -25,7 +25,7 @@ try {
   const panel = await openPanel(ctx, id, { width: PANEL, height: H });
   await panel.getByText('Connected').waitFor({ timeout: 20_000 });
 
-  // Toasts close by themselves after 3 s; keep them out of the screenshots.
+  // Toasts close by themselves after 2 s; keep them out of the screenshots.
   const toastGone = () => panel.locator('.toast-region .banner').waitFor({ state: 'detached', timeout: 10_000 });
 
   const setSegment = async (start, end) => {
@@ -78,6 +78,8 @@ try {
   await notes.click();
   await panel.getByLabel('Notes for Attempt 3').fill('Linking "the" + "cool thing" is smoother now. Stress on "really".');
   await panel.getByLabel('Notes for Attempt 3').blur();
+  // Store images only: hide Chrome's spell-check underlines in the note.
+  await panel.evaluate(() => document.querySelectorAll('textarea').forEach((t) => (t.spellcheck = false)));
   await panel.getByRole('button', { name: 'Play Attempt 2' }).click();
   await panel.waitForTimeout(900);
   await compose(yt, panel, 'screenshot-2-recordings.png');

@@ -131,7 +131,6 @@ typed message contracts (`messages.ts`) that both ends of each port import.
   so the speakers don't leak into the mic.
 * **Listen & repeat**: *Listen* plays the segment once (`once` mode pauses at the end). The panel
   then prompts *Record imitation*; after stopping, *Listen again* restarts the cycle.
-* **Compare**: plays the original segment once, then the selected attempt.
 
 ## Microphone permission
 

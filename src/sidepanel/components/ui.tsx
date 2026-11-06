@@ -26,7 +26,6 @@ const ICONS = {
   trash: <path d="M4 7h16M10 11v6M14 11v6M6 7l1 13h10l1-13M9 7V4h6v3" />,
   download: <path d="M12 4v11M7 10l5 5 5-5M5 20h14" />,
   external: <path d="M14 4h6v6M20 4l-9 9M18 14v5a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1h5" />,
-  compare: <path d="M8 4v16M16 4v16M4 8l4-4 4 4M12 16l4 4 4-4" />,
   x: <path d="M6 6l12 12M18 6L6 18" />,
   reload: <path d="M20 11a8 8 0 1 0-2.3 5.7M20 4v7h-7" />,
   ear: <path d="M6 9a6 6 0 1 1 12 0c0 3-2 4-3 5.5S14 18 12 20a3 3 0 0 1-4-1M10 9a2 2 0 1 1 4 0" />,

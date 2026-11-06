@@ -18,9 +18,10 @@ practice library. No account, no cloud: recordings stay on your computer.
   - *Listen & repeat*: *Listen* plays the segment once and pauses; then *Record* your imitation;
     *Listen again* for the next try.
 - **Attempts**: unlimited independent recordings per segment, each with attempt number, date, time and
-  duration. You can rename them, add notes, delete them, play them, or **Compare** (the original
-  segment, then the attempt).
-- **Library**: organised by Language → Video → Segment, with language and video filters. *Practice*
+  duration. You can rename them, add notes, delete them and play them; *Play original* replays the
+  YouTube segment so you can compare by ear.
+- **Library**: organised by Language → Video → Segment (languages and videos in alphabetical order,
+  segments without a language last under *Unsorted*), with language and video filters. *Practice*
   reopens the video at the segment and restores it.
 - **Export** to `Downloads/Shadowing Studio/<Language>/<Video>/`, e.g.
   `2026-11-06_14-03-09_My-Video_Segment01_Attempt02.webm`. You can export one attempt, a whole segment
@@ -146,9 +147,9 @@ a REC badge on the toolbar icon show it is active.
 - `filename.test.ts`: sanitisation, reserved names, export paths, de-duplication, `info.json`.
 
 `npm run test:e2e` drives your installed Chrome (via `playwright-core`; no browser download) against a real
-YouTube video with Chrome's **fake microphone**. It runs 33 checks, all passing on the last run: install,
+YouTube video with Chrome's **fake microphone**. It runs 36 checks, all passing on the last run: install,
 connect, timestamps, loop bounds at 0.5×/1×/2×, loop off, REC badge, shadowing auto-stop, listen & repeat
-pause and record, decoded WebM/Opus audio with a duration header, playback, rename, compare, export folder
+pause and record, decoded WebM/Opus audio with a duration header, playback, rename, attempt highlighting, play original, toasts, export folder
 structure, delete, SPA navigation, no console errors, **library and recordings after restarting Chrome**,
 and reopening a segment from the library. It handles YouTube's EU cookie dialog by declining non-essential
 cookies. Set `E2E_HEADED=1` to watch it run, or `E2E_SHOTS=<dir>` to save screenshots.
@@ -177,7 +178,7 @@ Run this once per release in a normal Chrome profile:
    the toolbar badge all show; it stops at the segment end. Record a second attempt: both are listed.
 7. **Listen & repeat**: *Listen*: it pauses at the end and shows *Your turn*. *Record*, speak, *Stop
    recording*. *Listen again* works.
-8. **Recordings**: play, pause, rename, add notes, *Compare*, delete (two clicks). Older attempts are
+8. **Recordings**: play, pause, rename, add notes, *Play original*, delete (two clicks). Older attempts are
    unaffected.
 9. **Interruptions**: start recording and close the side panel. Reopen it: *Recovered 1 recording*. Start
    recording and unplug the microphone: recording stops, and the audio so far is saved with a message.

@@ -308,6 +308,13 @@ textarea {
   color: #fff;
 }
 
+/* Same treatment as .btn-primary's hover (slightly darker fill), in red. */
+.btn-danger.confirm:hover:not(:disabled) {
+  background: color-mix(in srgb, var(--danger) 85%, black);
+  border-color: color-mix(in srgb, var(--danger) 85%, black);
+  color: #fff;
+}
+
 .btn-ghost {
   border-color: transparent;
   background: transparent;
@@ -497,10 +504,44 @@ select.input {
 .checkbox {
   display: inline-flex;
   align-items: center;
-  gap: 6px;
+  gap: var(--space-2);
   font-size: var(--text-sm);
   color: var(--text-2);
   cursor: pointer;
+  user-select: none;
+}
+
+/* Custom checkbox in the extension's style (matches inputs and the loop switch). */
+.checkbox input {
+  appearance: none;
+  flex: none;
+  width: 16px;
+  height: 16px;
+  margin: 0;
+  border: 1px solid var(--border-strong);
+  border-radius: 4px;
+  background: var(--surface) center / 12px 12px no-repeat;
+  cursor: pointer;
+  transition: background-color 0.12s, border-color 0.12s;
+}
+
+.checkbox input:hover:not(:disabled) {
+  border-color: var(--accent);
+}
+
+.checkbox input:checked {
+  background-color: var(--accent);
+  border-color: var(--accent);
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='white' stroke-width='3.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M5 12.5l4.5 4.5L19 7.5'/%3E%3C/svg%3E");
+}
+
+.checkbox:has(input:disabled) {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.checkbox input:disabled {
+  cursor: not-allowed;
 }
 
 /* ---------- Status ---------- */
@@ -731,7 +772,7 @@ select.input {
   background: color-mix(in srgb, var(--accent-soft) 60%, var(--surface));
 }
 
-.list-item.playing {
+.list-item.selected {
   box-shadow: inset 2px 0 0 var(--accent);
 }
 

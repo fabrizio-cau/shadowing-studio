@@ -9,11 +9,9 @@ export interface RecordingsViewProps {
   recordings: Recording[];
   player: AttemptPlayer;
   highlightId: string | null;
-  comparingId: string | null;
   canControlVideo: boolean;
   busy: boolean;
   onPlayOriginal: () => void;
-  onCompare: (recording: Recording) => void;
   onDelete: (recording: Recording) => void;
   onUpdate: (recording: Recording, patch: { name?: string; notes?: string }) => void;
   onExport: (recordings: Recording[]) => void;
@@ -21,6 +19,9 @@ export interface RecordingsViewProps {
 }
 
 export function RecordingsView(p: RecordingsViewProps) {
+  // The attempt the user last interacted with; until then, the one playing.
+  const [selectedId, setSelectedId] = useState<string | null>(null);
+  const selected = selectedId ?? p.player.currentId;
   if (!p.segment) {
     return (
       <Card>
@@ -60,7 +61,7 @@ export function RecordingsView(p: RecordingsViewProps) {
             <Icon name="download" /> Export all
           </button>
         </div>
-        {!p.canControlVideo && <p className="hint">Open this segment's video to play the original or compare.</p>}
+        {!p.canControlVideo && <p className="hint">Open this segment's video to play the original.</p>}
       </Card>
 
       {p.player.error && <p className="error-text">{p.player.error}</p>}
@@ -72,7 +73,7 @@ export function RecordingsView(p: RecordingsViewProps) {
       ) : (
         <div className="list" role="list" aria-label="Attempts">
           {[...p.recordings].reverse().map((r) => (
-            <AttemptRow key={r.id} recording={r} {...p} />
+            <AttemptRow key={r.id} recording={r} {...p} selected={selected === r.id} onSelect={() => setSelectedId(r.id)} />
           ))}
         </div>
       )}
@@ -80,7 +81,7 @@ export function RecordingsView(p: RecordingsViewProps) {
   );
 }
 
-function AttemptRow({ recording: r, player, highlightId, comparingId, canControlVideo, busy, onCompare, onDelete, onUpdate, onExport }: RecordingsViewProps & { recording: Recording }) {
+function AttemptRow({ recording: r, player, highlightId, busy, onDelete, onUpdate, onExport, selected, onSelect }: RecordingsViewProps & { recording: Recording; selected: boolean; onSelect: () => void }) {
   const [name, setName] = useState(r.name);
   const [notes, setNotes] = useState(r.notes);
   const [showNotes, setShowNotes] = useState(!!r.notes);
@@ -94,7 +95,8 @@ function AttemptRow({ recording: r, player, highlightId, comparingId, canControl
   const title = `Attempt ${r.attempt}`;
 
   return (
-    <div role="listitem" className={`list-item ${highlightId === r.id ? 'highlight' : ''} ${isCurrent ? 'playing' : ''}`}>
+    // Any interaction inside the row (play, name, notes, export, delete) makes it the selected attempt.
+    <div role="listitem" className={`list-item ${highlightId === r.id ? 'highlight' : ''} ${selected ? 'selected' : ''}`} onPointerDown={onSelect} onFocus={onSelect}>
       <div className="row nowrap">
         <button type="button" className={`btn btn-icon ${isPlaying ? 'active' : ''}`} onClick={() => (isPlaying ? player.pause() : player.play(r))} disabled={busy} aria-label={isPlaying ? `Pause ${title}` : `Play ${title}`}>
           <Icon name={isPlaying ? 'pause' : 'play'} />
@@ -123,9 +125,6 @@ function AttemptRow({ recording: r, player, highlightId, comparingId, canControl
         </div>
       )}
       <div className="row">
-        <button type="button" className={`btn btn-sm ${comparingId === r.id ? 'active' : ''}`} onClick={() => onCompare(r)} disabled={!canControlVideo || busy} title="Play the original segment, then this attempt">
-          <Icon name="compare" /> {comparingId === r.id ? 'Comparing…' : 'Compare'}
-        </button>
         <button type="button" className={`btn btn-sm btn-ghost ${showNotes ? 'active' : ''}`} onClick={() => setShowNotes((v) => !v)} aria-expanded={showNotes}>
           <Icon name="notes" /> Notes
         </button>
