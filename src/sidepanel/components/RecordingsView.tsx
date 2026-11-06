@@ -126,7 +126,7 @@ function AttemptRow({ recording: r, player, busy, onDelete, onUpdate, onExport, 
             <input
               className="name-input"
               value={name}
-              placeholder="e.g. Best so far"
+              placeholder="Title"
               aria-label={`Name of ${title}`}
               maxLength={80}
               onChange={(e) => setName(e.target.value)}
@@ -165,7 +165,7 @@ function AttemptRow({ recording: r, player, busy, onDelete, onUpdate, onExport, 
         <textarea
           className="input"
           value={notes}
-          placeholder="What to improve next time…"
+          placeholder="Notes"
           aria-label={`Notes for ${title}`}
           maxLength={2000}
           onChange={(e) => setNotes(e.target.value)}
