@@ -188,6 +188,9 @@ try {
   await panel.getByRole('tab', { name: /Recordings/ }).click();
   const rows = panel.locator('[role=listitem]');
   check('Recordings tab lists all attempts', (await rows.count()) === 3);
+  const indexes = await rows.locator('.seg-num').allTextContents();
+  check('Attempts show their index, newest first', indexes.join(',') === '#3,#2,#1', indexes.join(','));
+  check('No attempt is tinted as "just saved"', (await panel.locator('[role=listitem].highlight').count()) === 0);
   await panel.getByRole('button', { name: 'Play Attempt 1' }).click();
   await panel.getByRole('button', { name: 'Pause Attempt 1' }).waitFor({ timeout: 5000 });
   await panel.getByRole('button', { name: 'Play Attempt 1' }).waitFor({ timeout: 10_000 });

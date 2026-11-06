@@ -149,7 +149,7 @@ a REC badge on the toolbar icon show it is active.
 - `filename.test.ts`: sanitisation, reserved names, export paths, de-duplication, `info.json`.
 
 `npm run test:e2e` drives your installed Chrome (via `playwright-core`; no browser download) against a real
-YouTube video with Chrome's **fake microphone**. It runs 39 checks, all passing on the last run: install,
+YouTube video with Chrome's **fake microphone**. It runs 41 checks, all passing on the last run: install,
 connect, timestamps, loop bounds at 0.5×/1×/2×, loop off, REC badge, shadowing auto-stop, listen & repeat
 pause and record, decoded WebM/Opus audio with a duration header, playback, rename, attempt highlighting, play original, toasts, export folder
 structure, delete, SPA navigation, no console errors, **library and recordings after restarting Chrome**,

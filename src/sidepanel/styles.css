@@ -785,6 +785,23 @@ select.input {
   margin-right: var(--space-2);
 }
 
+/* Attempt rows: "#3" followed by the editable name, on one line. */
+.attempt-title {
+  display: flex;
+  align-items: center;
+  min-width: 0;
+}
+
+.attempt-title .seg-num {
+  flex: none;
+  margin-right: 4px;
+}
+
+/* Keeps the button the same width when it switches between Play and Pause. */
+.btn-play {
+  min-width: 68px;
+}
+
 .name-input {
   border: 1px solid transparent;
   background: transparent;
@@ -902,4 +919,10 @@ select.input {
 
 .permission-status[data-tone='error'] {
   color: var(--danger);
+}
+
+.attempt-meta span + span::before {
+  content: '·';
+  margin: 0 5px;
+  font-family: var(--font);
 }

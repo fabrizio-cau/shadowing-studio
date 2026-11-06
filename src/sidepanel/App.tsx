@@ -69,7 +69,6 @@ export function App() {
   const [notice, setNotice] = useState<Notice | null>(null);
   const [toastHovered, setToastHovered] = useState(false);
   const [unsaved, setUnsaved] = useState<{ blob: Blob; mimeType: string } | null>(null);
-  const [highlightId, setHighlightId] = useState<string | null>(null);
   const [libraryVersion, bumpLibrary] = useReducer((x: number) => x + 1, 0);
 
   const connRef = useRef<PlayerConnection | null>(null);
@@ -139,7 +138,6 @@ export function App() {
   }, []);
 
   live.current.onSaved = (rec) => {
-    setHighlightId(rec.id);
     setNotice({ tone: 'success', text: `Attempt ${rec.attempt} saved.` });
     void refreshRecordings(rec.segmentId);
     bumpLibrary();
@@ -259,7 +257,6 @@ export function App() {
     setWs({ videoId: seg.videoId, segmentId: seg.id, startText: formatTimestamp(seg.start, 'floor'), endText: formatTimestamp(seg.end, 'ceil') });
     setSaved(seg);
     setLanguage(seg.language);
-    setHighlightId(null);
     void refreshRecordings(seg.id);
   }
 
@@ -611,7 +608,6 @@ export function App() {
             segment={saved}
             recordings={recordings}
             player={attemptPlayer}
-            highlightId={highlightId}
             canControlVideo={onCurrentVideo && !!bounds}
             busy={recStatus !== 'idle'}
             onPlayOriginal={() => {
