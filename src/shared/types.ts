@@ -39,7 +39,7 @@ export interface Settings {
   autoStop: boolean;
 }
 
-export const DEFAULT_SETTINGS: Settings = { mode: 'shadowing', language: 'English', autoStop: true };
+export const DEFAULT_SETTINGS: Settings = { mode: 'shadowing', language: '', autoStop: true };
 
 export function watchUrl(videoId: string, start?: number): string {
   const base = `https://www.youtube.com/watch?v=${encodeURIComponent(videoId)}`;

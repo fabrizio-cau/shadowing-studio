@@ -72,9 +72,13 @@ describe('formatClock / formatSegmentLength', () => {
   });
 
   it('formats segment lengths', () => {
-    expect(formatSegmentLength(3.254)).toBe('3.25 s');
-    expect(formatSegmentLength(64)).toBe('1 min 4.0 s');
-    expect(formatSegmentLength(0)).toBe('0 s');
+    expect(formatSegmentLength(3)).toBe('3s');
+    expect(formatSegmentLength(10.4)).toBe('10s');
+    expect(formatSegmentLength(60)).toBe('1m 0s');
+    expect(formatSegmentLength(70)).toBe('1m 10s');
+    expect(formatSegmentLength(3725)).toBe('1h 2m 5s');
+    expect(formatSegmentLength(0)).toBe('0s');
+    expect(formatSegmentLength(NaN)).toBe('0s');
   });
 });
 

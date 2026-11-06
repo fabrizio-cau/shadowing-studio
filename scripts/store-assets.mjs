@@ -25,6 +25,9 @@ try {
   const panel = await openPanel(ctx, id, { width: PANEL, height: H });
   await panel.getByText('Connected').waitFor({ timeout: 20_000 });
 
+  // Toasts close by themselves after 3 s; keep them out of the screenshots.
+  const toastGone = () => panel.locator('.toast-region .banner').waitFor({ state: 'detached', timeout: 10_000 });
+
   const setSegment = async (start, end) => {
     await field(panel, 'Start').fill(start);
     await field(panel, 'Start').press('Enter');
@@ -33,18 +36,19 @@ try {
   };
 
   // A second saved segment makes the library look like real use.
+  await field(panel, 'Language').fill('English');
   await setSegment('00:00:08', '00:00:12');
   await panel.getByRole('button', { name: 'Save' }).click();
   await panel.getByText(/Segment #1 saved/).waitFor();
-  // Retiming a saved segment without attempts would update it; Reset starts a new one.
-  await panel.getByRole('button', { name: 'Reset' }).click();
+  // Retiming a saved segment without attempts would update it; New starts a new one.
+  await panel.getByRole('button', { name: 'New', exact: true }).click();
 
   await setSegment('00:00:02', '00:00:05');
   for (const n of [1, 2]) {
     await panel.getByRole('button', { name: 'Record attempt' }).click();
     await panel.getByText(`Attempt ${n} saved.`).waitFor({ timeout: 15_000 });
   }
-  await panel.getByRole('button', { name: 'Dismiss' }).click();
+  await toastGone();
 
   // Shadowing recordings leave the loop on, so set the switch to a state rather than toggling.
   const setLoop = async (on) => {
@@ -64,7 +68,7 @@ try {
   await yt.evaluate(() => document.querySelector('video.html5-main-video').pause());
 
   // 2. Recordings: named attempt with a note, one playing.
-  await panel.getByRole('button', { name: 'Dismiss' }).click();
+  await toastGone();
   await panel.getByRole('tab', { name: /Recordings/ }).click();
   await panel.getByLabel('Name of Attempt 1').fill('First try');
   await panel.getByLabel('Name of Attempt 1').press('Enter');

@@ -103,12 +103,14 @@ try {
   const title = await panel.locator('.video-title').textContent();
   check('Panel connects to the YouTube tab and shows the video', !!title, `title "${title}"`);
 
+  check('Language field starts empty, with a placeholder', (await field(panel, 'Language').inputValue()) === '' && (await field(panel, 'Language').getAttribute('placeholder')) === 'e.g. Spanish');
+  await field(panel, 'Language').fill('English');
   await field(panel, 'Start').fill('2');
   await field(panel, 'Start').press('Enter');
   await field(panel, 'End').fill('0:05');
   await field(panel, 'End').press('Enter');
   check('Timestamps normalise to HH:MM:SS', (await field(panel, 'Start').inputValue()) === '00:00:02' && (await field(panel, 'End').inputValue()) === '00:00:05');
-  check('Segment length is displayed', await panel.getByText('3.00 s').isVisible());
+  check('Segment length is displayed', await panel.getByText('Length: 3s').isVisible());
 
   await field(panel, 'End').fill('0:01');
   await field(panel, 'End').press('Enter');
@@ -151,6 +153,10 @@ try {
   await panel.getByRole('button', { name: 'Record attempt' }).click();
   await panel.getByText('Attempt 2 saved.').waitFor({ timeout: 15_000 });
   check('Second independent attempt saved', true);
+  const cardTop = async () => (await panel.locator('main .card').first().boundingBox()).y;
+  const topWithToast = await cardTop();
+  const closed = await panel.locator('.toast-region .banner').waitFor({ state: 'detached', timeout: 5000 }).then(() => true, () => false);
+  check('Toast closes by itself and the layout does not move', closed && topWithToast === (await cardTop()), `top ${topWithToast} → ${await cardTop()}`);
 
   // Listen & repeat.
   await panel.getByRole('radio', { name: 'Listen & repeat' }).click();

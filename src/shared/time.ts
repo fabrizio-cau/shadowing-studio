@@ -52,12 +52,15 @@ export function formatClock(seconds: number, withMs = false): string {
   return withMs ? `${base}.${pad(totalMs % 1000, 3)}` : base;
 }
 
-/** Human length of a segment: `3.25 s`, `1 min 4.0 s`. */
+/** Readable length of a segment, in whole seconds: `10s`, `1m 10s`, `1h 2m 5s`. */
 export function formatSegmentLength(seconds: number): string {
-  if (!Number.isFinite(seconds) || seconds <= 0) return '0 s';
-  if (seconds < 60) return `${seconds.toFixed(2)} s`;
-  const m = Math.floor(seconds / 60);
-  return `${m} min ${(seconds - m * 60).toFixed(1)} s`;
+  const total = Number.isFinite(seconds) && seconds > 0 ? Math.round(seconds) : 0;
+  const h = Math.floor(total / 3600);
+  const m = Math.floor(total / 60) % 60;
+  const s = total % 60;
+  if (h > 0) return `${h}h ${m}m ${s}s`;
+  if (m > 0) return `${m}m ${s}s`;
+  return `${s}s`;
 }
 
 function pad(n: number, width: number): string {

@@ -35,6 +35,7 @@ const store = new ShadowingStore();
 const fixDuration: FixDuration = (blob, ms) => fixWebmDuration(blob, ms, { logger: false });
 /** Crash recovery runs once per panel document (StrictMode mounts effects twice in development). */
 let recovery: Promise<Recording[]> | null = null;
+const TOAST_MS = 3000;
 const EMPTY_WORKSPACE: Workspace = { videoId: null, segmentId: null, startText: '', endText: '' };
 
 /** `?tabId=N` pins the panel to one tab. Only used when the panel page is opened as a tab by automated tests. */
@@ -66,6 +67,7 @@ export function App() {
   const [phase, setPhase] = useState<RepeatPhase>('idle');
   const [mic, setMic] = useState<MicPermission>('unknown');
   const [notice, setNotice] = useState<Notice | null>(null);
+  const [toastHovered, setToastHovered] = useState(false);
   const [unsaved, setUnsaved] = useState<{ blob: Blob; mimeType: string } | null>(null);
   const [highlightId, setHighlightId] = useState<string | null>(null);
   const [comparingId, setComparingId] = useState<string | null>(null);
@@ -137,6 +139,18 @@ export function App() {
     bumpLibrary();
     if (live.current.settings.mode === 'repeat') setPhase('done');
   };
+
+  // Notices disappear after 3 s (paused while hovered). Ones with a button stay until used or dismissed.
+  useEffect(() => {
+    if (!notice) {
+      // The region collapses when empty, so mouseleave may never fire: reset the hover state.
+      setToastHovered(false);
+      return;
+    }
+    if (notice.action || toastHovered) return;
+    const id = setTimeout(() => setNotice(null), TOAST_MS);
+    return () => clearTimeout(id);
+  }, [notice, toastHovered]);
 
   // ---- startup: settings, mic permission, crash recovery, player connection ----
   useEffect(() => {
@@ -264,7 +278,7 @@ export function App() {
   /** Returns the saved segment for the current bounds, creating or updating it as needed. */
   async function ensureSegment(): Promise<Segment> {
     if (!bounds || !player?.videoId) throw new Error('Select a valid segment first.');
-    const lang = language.trim() || 'English';
+    const lang = language.trim();
     if (saved && saved.videoId === player.videoId) {
       if (sameBounds(saved, bounds) && saved.language === lang) return saved;
       if (sameBounds(saved, bounds) || recordings.length === 0) {
@@ -509,6 +523,24 @@ export function App() {
             </button>
           ))}
         </nav>
+        {/* Overlays the content below the header, so nothing shifts when it appears or disappears. */}
+        <div className="toast-region" onMouseEnter={() => setToastHovered(true)} onMouseLeave={() => setToastHovered(false)}>
+          {notice && (
+            <Banner
+              tone={notice.tone}
+              onDismiss={() => setNotice(null)}
+              action={
+                notice.action && (
+                  <button type="button" className="btn btn-sm" onClick={notice.action.run}>
+                    {notice.action.label}
+                  </button>
+                )
+              }
+            >
+              {notice.text}
+            </Banner>
+          )}
+        </div>
       </header>
 
       <main className="content">
@@ -532,21 +564,6 @@ export function App() {
             A recording could not be saved to the library.
           </Banner>
         )}
-        {notice && (
-          <Banner
-            tone={notice.tone}
-            onDismiss={() => setNotice(null)}
-            action={
-              notice.action && (
-                <button type="button" className="btn btn-sm" onClick={notice.action.run}>
-                  {notice.action.label}
-                </button>
-              )
-            }
-          >
-            {notice.text}
-          </Banner>
-        )}
 
         {tab === 'practice' && (
           <PracticeView
@@ -557,7 +574,7 @@ export function App() {
             language={language}
             onLanguageChange={(l) => {
               setLanguage(l);
-              if (l.trim()) updateSettings({ language: l.trim() });
+              updateSettings({ language: l.trim() });
             }}
             startText={ws.startText}
             endText={ws.endText}

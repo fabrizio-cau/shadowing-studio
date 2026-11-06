@@ -153,7 +153,6 @@ function VideoCard(p: PracticeViewProps) {
           className="input"
           value={p.language}
           onChange={(e) => p.onLanguageChange(e.target.value)}
-          onBlur={(e) => !e.target.value.trim() && p.onLanguageChange('English')}
           placeholder="e.g. Spanish"
           autoComplete="off"
           maxLength={40}
@@ -229,7 +228,7 @@ function SegmentCard(p: PracticeViewProps & { player: PlayerState }) {
         <p className="error-text">{p.segmentError}</p>
       ) : (
         <p className="hint">
-          Length <strong className="mono">{formatSegmentLength(p.segmentLength ?? 0)}</strong>
+          Length: <strong>{formatSegmentLength(p.segmentLength ?? 0)}</strong>
         </p>
       )}
       {p.saveState === 'modified-new' && (
@@ -243,8 +242,8 @@ function SegmentCard(p: PracticeViewProps & { player: PlayerState }) {
           <Icon name="save" /> {p.saveState === 'modified' ? 'Update' : 'Save'}
         </button>
         <span className="grow" />
-        <button type="button" className="btn btn-ghost" onClick={p.onReset} disabled={empty || busy}>
-          Reset
+        <button type="button" className="btn btn-ghost" onClick={p.onReset} disabled={empty || busy} title="Clear the times to start a new segment">
+          New
         </button>
       </div>
       {p.videoSegments.length > 0 && (

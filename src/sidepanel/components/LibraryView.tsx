@@ -14,6 +14,9 @@ export interface LibraryViewProps {
   onDelete: (segment: Segment) => void;
 }
 
+/** Segments saved without a language; the same label export folders use. */
+const languageLabel = (language: string) => language || 'Unsorted';
+
 interface VideoGroup {
   videoId: string;
   title: string;
@@ -104,7 +107,7 @@ export function LibraryView(p: LibraryViewProps) {
             <option value="all">All languages</option>
             {languages.map((l) => (
               <option key={l} value={l}>
-                {l}
+                {languageLabel(l)}
               </option>
             ))}
           </select>
@@ -124,7 +127,7 @@ export function LibraryView(p: LibraryViewProps) {
 
       {tree.map((lang) => (
         <div key={lang.language} className="group">
-          <h3 className="group-title">{lang.language}</h3>
+          <h3 className="group-title">{languageLabel(lang.language)}</h3>
           {lang.videos.map((v) => (
             <div key={v.videoId} className="list">
               <div className="video-head">
