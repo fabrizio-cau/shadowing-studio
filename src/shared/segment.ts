@@ -12,8 +12,8 @@ export interface SegmentBounds {
  * Returns a user-facing error message, or null when valid.
  */
 export function validateSegment(start: number | null, end: number | null, duration?: number): string | null {
-  if (start === null || !Number.isFinite(start)) return 'Start time is not a valid timestamp (use HH:MM:SS.mmm).';
-  if (end === null || !Number.isFinite(end)) return 'End time is not a valid timestamp (use HH:MM:SS.mmm).';
+  if (start === null || !Number.isFinite(start)) return 'Start time is not a valid timestamp (use HH:MM:SS).';
+  if (end === null || !Number.isFinite(end)) return 'End time is not a valid timestamp (use HH:MM:SS).';
   if (start < 0) return 'Start time cannot be negative.';
   if (end <= start) return 'End time must be after the start time.';
   if (end - start < MIN_SEGMENT_SECONDS) return `The segment must be at least ${MIN_SEGMENT_SECONDS} s long.`;

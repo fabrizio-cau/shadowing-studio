@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import type { PlayerState } from '../../shared/messages';
-import { formatClock, formatSegmentLength, formatTimestamp, parseTimestamp } from '../../shared/time';
+import { formatClock, formatSegmentLength, formatTimestamp, parseTimestamp, type Rounding } from '../../shared/time';
 import type { PracticeMode, Segment } from '../../shared/types';
 import type { MicPermission } from '../microphone';
 import type { Connection } from '../player';
@@ -10,8 +10,6 @@ import { Banner, Card, Empty, Icon, Segmented } from './ui';
 export type RepeatPhase = 'idle' | 'listening' | 'your-turn' | 'done';
 export type SaveState = 'new' | 'saved' | 'modified' | 'modified-new';
 
-const LANGUAGES = ['English', 'Spanish', 'French', 'German', 'Italian', 'Portuguese', 'Japanese', 'Korean', 'Chinese', 'Russian', 'Arabic', 'Dutch'];
-
 export interface PracticeViewProps {
   connection: Connection;
   player: PlayerState | null;
@@ -19,7 +17,6 @@ export interface PracticeViewProps {
   onOpenYouTube: () => void;
 
   language: string;
-  knownLanguages: string[];
   onLanguageChange: (language: string) => void;
 
   startText: string;
@@ -154,30 +151,25 @@ function VideoCard(p: PracticeViewProps) {
         <span className="field-label">Language</span>
         <input
           className="input"
-          list="yss-languages"
           value={p.language}
           onChange={(e) => p.onLanguageChange(e.target.value)}
           onBlur={(e) => !e.target.value.trim() && p.onLanguageChange('English')}
           placeholder="e.g. Spanish"
+          autoComplete="off"
           maxLength={40}
         />
-        <datalist id="yss-languages">
-          {[...new Set([...p.knownLanguages, ...LANGUAGES])].map((l) => (
-            <option key={l} value={l} />
-          ))}
-        </datalist>
       </label>
     </Card>
   );
 }
 
-function TimeField({ label, value, onCommit, onSetNow, invalid }: { label: string; value: string; onCommit: (v: string) => void; onSetNow: () => void; invalid: boolean }) {
+function TimeField({ label, value, onCommit, onSetNow, invalid, rounding }: { label: string; value: string; onCommit: (v: string) => void; onSetNow: () => void; invalid: boolean; rounding: Rounding }) {
   const [text, setText] = useState(value);
   useEffect(() => setText(value), [value]);
   const commit = () => {
     const parsed = parseTimestamp(text);
-    // Normalise valid input to HH:MM:SS.mmm; keep invalid text so the error can be fixed in place.
-    const normalised = parsed === null ? text.trim() : formatTimestamp(parsed);
+    // Normalise valid input to HH:MM:SS; keep invalid text so the error can be fixed in place.
+    const normalised = parsed === null ? text.trim() : formatTimestamp(parsed, rounding);
     setText(normalised);
     if (normalised !== value) onCommit(normalised);
   };
@@ -188,7 +180,7 @@ function TimeField({ label, value, onCommit, onSetNow, invalid }: { label: strin
         <input
           className="input mono"
           value={text}
-          placeholder="00:00:00.000"
+          placeholder="00:00:00"
           spellCheck={false}
           inputMode="decimal"
           aria-invalid={invalid}
@@ -226,12 +218,12 @@ function SegmentCard(p: PracticeViewProps & { player: PlayerState }) {
       }
     >
       <div className="time-grid">
-        <TimeField label="Start" value={p.startText} onCommit={p.onStartChange} onSetNow={p.onSetStartNow} invalid={!!p.segmentError && !empty} />
-        <TimeField label="End" value={p.endText} onCommit={p.onEndChange} onSetNow={p.onSetEndNow} invalid={!!p.segmentError && !empty} />
+        <TimeField label="Start" value={p.startText} onCommit={p.onStartChange} onSetNow={p.onSetStartNow} invalid={!!p.segmentError && !empty} rounding="floor" />
+        <TimeField label="End" value={p.endText} onCommit={p.onEndChange} onSetNow={p.onSetEndNow} invalid={!!p.segmentError && !empty} rounding="ceil" />
       </div>
       {empty ? (
         <p className="hint">
-          Play the video and press <Icon name="target" /> at the start and the end of a sentence, or type times like <span className="mono">1:23.5</span>.
+          Play the video and press <Icon name="target" /> at the start and the end of a sentence, or type times like <span className="mono">00:01:23</span>.
         </p>
       ) : p.segmentError ? (
         <p className="error-text">{p.segmentError}</p>

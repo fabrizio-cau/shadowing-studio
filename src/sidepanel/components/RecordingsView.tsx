@@ -44,7 +44,7 @@ export function RecordingsView(p: RecordingsViewProps) {
         title={`Segment #${seg.number}`}
         actions={
           <span className="mono subtle" style={{ textTransform: 'none', letterSpacing: 0 }}>
-            {formatClock(seg.start, true)} – {formatClock(seg.end, true)}
+            {formatClock(seg.start)} – {formatClock(seg.end)}
           </span>
         }
       >

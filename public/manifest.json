@@ -1,6 +1,6 @@
 {
   "manifest_version": 3,
-  "name": "Shadowing Studio for YouTube",
+  "name": "Shadowing Studio",
   "short_name": "Shadowing Studio",
   "version": "1.0.0",
   "description": "Loop any YouTube sentence, record your shadowing attempts, compare them and keep a local practice library.",

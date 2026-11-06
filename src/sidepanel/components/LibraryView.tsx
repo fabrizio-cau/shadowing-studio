@@ -144,7 +144,7 @@ export function LibraryView(p: LibraryViewProps) {
                         <div className="item-title">
                           <span className="seg-num">#{s.number}</span>
                           <span className="mono">
-                            {formatClock(s.start, true)} – {formatClock(s.end, true)}
+                            {formatClock(s.start)} – {formatClock(s.end)}
                           </span>
                         </div>
                         <div className="subtle">

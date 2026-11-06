@@ -1,4 +1,4 @@
-# Shadowing Studio for YouTube — Architecture
+# Shadowing Studio — Architecture
 
 ## Goals and constraints
 
@@ -120,7 +120,7 @@ requirement, so it was left out.
 
 ### Shared (`src/shared`)
 
-Timestamp parsing/formatting (`HH:MM:SS.mmm`), segment validation, filename sanitisation and the
+Timestamp parsing/formatting (`HH:MM:SS`; segment starts round down and ends round up to whole seconds), segment validation, filename sanitisation and the
 typed message contracts (`messages.ts`) that both ends of each port import.
 
 ## Practice modes

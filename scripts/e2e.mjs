@@ -107,13 +107,13 @@ try {
   await field(panel, 'Start').press('Enter');
   await field(panel, 'End').fill('0:05');
   await field(panel, 'End').press('Enter');
-  check('Timestamps normalise to HH:MM:SS.mmm', (await field(panel, 'Start').inputValue()) === '00:00:02.000' && (await field(panel, 'End').inputValue()) === '00:00:05.000');
+  check('Timestamps normalise to HH:MM:SS', (await field(panel, 'Start').inputValue()) === '00:00:02' && (await field(panel, 'End').inputValue()) === '00:00:05');
   check('Segment length is displayed', await panel.getByText('3.00 s').isVisible());
 
   await field(panel, 'End').fill('0:01');
   await field(panel, 'End').press('Enter');
   check('Invalid segment is rejected with a message', await panel.getByText('End time must be after the start time.').isVisible());
-  await field(panel, 'End').fill('00:00:05.000');
+  await field(panel, 'End').fill('00:00:05');
   await field(panel, 'End').press('Enter');
 
   // The switch mirrors the content script's loop state, so it flips once the tab confirms.
@@ -247,7 +247,7 @@ try {
   check('Recordings survive a browser restart', db.recordings.length === 2 && db.recordings.every((r) => r.decoded > 0.5));
 
   await panel2.getByRole('button', { name: 'Practice', exact: true }).click();
-  await panel2.waitForFunction(() => document.querySelector('label.field input')?.value === '00:00:02.000' || [...document.querySelectorAll('input')].some((i) => i.value === '00:00:02.000'), null, { timeout: 60_000 });
+  await panel2.waitForFunction(() => document.querySelector('label.field input')?.value === '00:00:02' || [...document.querySelectorAll('input')].some((i) => i.value === '00:00:02'), null, { timeout: 60_000 });
   const ytTab = ctx.pages().find((p) => p.url().includes(`v=${VIDEO}`));
   check('Reopening a saved segment opens its video and restores the times', !!ytTab, ytTab?.url());
   if (ytTab) {

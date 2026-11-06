@@ -637,6 +637,13 @@ select.input {
   margin: 0;
 }
 
+/* Icons inside running text: the size of a letter, sitting on the baseline. */
+.hint svg {
+  width: 1.1em;
+  height: 1.1em;
+  vertical-align: -0.2em;
+}
+
 .error-text {
   font-size: var(--text-sm);
   color: var(--danger);

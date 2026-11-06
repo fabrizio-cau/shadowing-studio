@@ -1,8 +1,8 @@
-# Privacy Policy — Shadowing Studio for YouTube
+# Privacy Policy — Shadowing Studio
 
 _Last updated: 6 November 2026_
 
-Shadowing Studio for YouTube ("the extension") is a language-practice tool. It is built to work
+Shadowing Studio ("the extension") is a language-practice tool. It is built to work
 entirely on your own computer.
 
 ## What the extension handles

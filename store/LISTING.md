@@ -13,7 +13,7 @@ Everything you paste into the [Developer Dashboard](https://chrome.google.com/we
 
 ## Store listing tab
 
-**Name** (taken from the manifest): `Shadowing Studio for YouTube`
+**Name** (taken from the manifest): `Shadowing Studio`
 
 **Summary** (from the manifest `description`, max 132 characters):
 
@@ -31,7 +31,7 @@ Shadowing Studio turns any YouTube video into a speaking drill. Pick one sentenc
 
 HOW IT WORKS
 1. Open a YouTube video and click the Shadowing Studio icon. The practice panel opens beside the video.
-2. Mark the start and end of a sentence with one click each (or type exact times like 1:23.5).
+2. Mark the start and end of a sentence with one click each (or type times like 00:01:23).
 3. Turn on Loop. The sentence repeats seamlessly, at any playback speed.
 4. Record your attempt. Do it again. Every attempt is kept.
 5. Play your attempts back, or press Compare to hear the original followed by your version.

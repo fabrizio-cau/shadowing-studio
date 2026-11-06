@@ -2,7 +2,7 @@ import fixWebmDuration from 'fix-webm-duration';
 import { useCallback, useEffect, useMemo, useReducer, useRef, useState } from 'react';
 import type { PlayerCommand, PlayerEvent, PlayerState } from '../shared/messages';
 import { sameBounds, validateSegment } from '../shared/segment';
-import { formatTimestamp, parseTimestamp } from '../shared/time';
+import { formatTimestamp, parseTimestamp, toWholeSeconds } from '../shared/time';
 import { DEFAULT_SETTINGS, watchUrl, type PracticeMode, type Recording, type Segment, type Settings } from '../shared/types';
 import { ShadowingStore, type FixDuration } from '../storage/db';
 import { LibraryView } from './components/LibraryView';
@@ -43,6 +43,11 @@ const fixedTabId = (() => {
   return v && /^\d+$/.test(v) ? Number(v) : undefined;
 })();
 
+/** End rounds up so the sentence is not clipped, but never past the end of the video. */
+function endTimestamp(time: number, duration: number): string {
+  return Number.isFinite(duration) && toWholeSeconds(time, 'ceil') > duration ? formatTimestamp(duration, 'floor') : formatTimestamp(time, 'ceil');
+}
+
 function errorText(err: unknown): string {
   return err instanceof Error ? err.message : String(err);
 }
@@ -56,7 +61,6 @@ export function App() {
   const [language, setLanguage] = useState(DEFAULT_SETTINGS.language);
   const [saved, setSaved] = useState<Segment | null>(null);
   const [videoSegments, setVideoSegments] = useState<Segment[]>([]);
-  const [knownLanguages, setKnownLanguages] = useState<string[]>([]);
   const [recordings, setRecordings] = useState<Recording[]>([]);
   const [recStatus, setRecStatus] = useState<RecorderStatus>('idle');
   const [phase, setPhase] = useState<RepeatPhase>('idle');
@@ -140,7 +144,6 @@ export function App() {
       setSettings(s);
       setLanguage(s.language);
     });
-    void store.listSegments().then((segs) => setKnownLanguages([...new Set(segs.map((s) => s.language))]), () => undefined);
     void navigator.storage?.persist?.().catch(() => undefined);
     (recovery ??= store.recoverDrafts(fixDuration, recorder.activeDraftIds()))
       .then((recovered) => {
@@ -208,7 +211,7 @@ export function App() {
     } else {
       // A segment already in the content script (e.g. panel reopened while looping) is adopted.
       const s = live.current.player?.segment;
-      setWs({ videoId: playerVideoId, segmentId: null, startText: s ? formatTimestamp(s.start) : '', endText: s ? formatTimestamp(s.end) : '' });
+      setWs({ videoId: playerVideoId, segmentId: null, startText: s ? formatTimestamp(s.start, 'floor') : '', endText: s ? formatTimestamp(s.end, 'ceil') : '' });
       setSaved(null);
       setRecordings([]);
       void store.listSegmentsForVideo(playerVideoId).then((segs) => {
@@ -243,7 +246,7 @@ export function App() {
   }, [boundsKey, onCurrentVideo, send]);
 
   function loadSegment(seg: Segment) {
-    setWs({ videoId: seg.videoId, segmentId: seg.id, startText: formatTimestamp(seg.start), endText: formatTimestamp(seg.end) });
+    setWs({ videoId: seg.videoId, segmentId: seg.id, startText: formatTimestamp(seg.start, 'floor'), endText: formatTimestamp(seg.end, 'ceil') });
     setSaved(seg);
     setLanguage(seg.language);
     setHighlightId(null);
@@ -276,7 +279,6 @@ export function App() {
     setWs((w) => ({ ...w, segmentId: seg.id }));
     setSaved(seg);
     setRecordings([]);
-    setKnownLanguages((l) => (l.includes(lang) ? l : [...l, lang]));
     void refreshVideoSegments(seg.videoId);
     bumpLibrary();
     return seg;
@@ -553,7 +555,6 @@ export function App() {
             onReloadTab={() => void connRef.current?.reloadTab()}
             onOpenYouTube={() => void chrome.tabs.create({ url: 'https://www.youtube.com/' })}
             language={language}
-            knownLanguages={knownLanguages}
             onLanguageChange={(l) => {
               setLanguage(l);
               if (l.trim()) updateSettings({ language: l.trim() });
@@ -562,8 +563,8 @@ export function App() {
             endText={ws.endText}
             onStartChange={setStartText}
             onEndChange={setEndText}
-            onSetStartNow={() => player && setStartText(formatTimestamp(player.currentTime))}
-            onSetEndNow={() => player && setEndText(formatTimestamp(player.currentTime))}
+            onSetStartNow={() => player && setStartText(formatTimestamp(player.currentTime, 'floor'))}
+            onSetEndNow={() => player && setEndText(endTimestamp(player.currentTime, player.duration))}
             segmentError={segmentError}
             segmentLength={segmentLength}
             saveState={saveState}

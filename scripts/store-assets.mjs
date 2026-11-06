@@ -33,13 +33,13 @@ try {
   };
 
   // A second saved segment makes the library look like real use.
-  await setSegment('00:00:08.000', '00:00:11.500');
+  await setSegment('00:00:08', '00:00:12');
   await panel.getByRole('button', { name: 'Save' }).click();
   await panel.getByText(/Segment #1 saved/).waitFor();
   // Retiming a saved segment without attempts would update it; Reset starts a new one.
   await panel.getByRole('button', { name: 'Reset' }).click();
 
-  await setSegment('00:00:02.000', '00:00:05.000');
+  await setSegment('00:00:02', '00:00:05');
   for (const n of [1, 2]) {
     await panel.getByRole('button', { name: 'Record attempt' }).click();
     await panel.getByText(`Attempt ${n} saved.`).waitFor({ timeout: 15_000 });

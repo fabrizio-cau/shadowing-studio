@@ -1,4 +1,4 @@
-# Shadowing Studio for YouTube
+# Shadowing Studio
 
 A Chrome extension for **shadowing practice** on YouTube. Pick a sentence, loop it, record yourself
 speaking along (or after it), compare your attempts with the original, and keep everything in a local
@@ -6,8 +6,9 @@ practice library. No account, no cloud: recordings stay on your computer.
 
 ## Features
 
-- **Segments**: set start/end from the current position (⌖) or type `HH:MM:SS.mmm`
-  (short forms such as `1:23.5` work too). Inputs are validated against the video length, and the
+- **Segments**: set start/end from the current position (⌖) or type `HH:MM:SS`
+  (short forms such as `1:23` work too). Times are whole seconds: the start rounds down and the end
+  rounds up, so a sentence is never clipped. Inputs are validated against the video length, and the
   segment's length is shown.
 - **Looping**: replays the segment indefinitely, at any playback speed, without fighting YouTube's
   own controls. Looping keeps running if you close the panel.

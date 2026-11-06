@@ -71,7 +71,7 @@ describe('planExport', () => {
     const info = files.find((f) => f.path.endsWith('_info.json'))!;
     const json = JSON.parse(await info.blob.text());
     expect(json.video.id).toBe('abcdefghijk');
-    expect(json.segments[0].start).toBe('00:00:01.000');
+    expect(json.segments[0].start).toBe('00:00:01');
     expect(json.segments[0].attempts.map((a: { attempt: number }) => a.attempt)).toEqual([1, 2]);
     expect(json.segments[0].attempts[0].name).toBe('first');
     expect(json.segments[0].attempts[1].file).toBe(files[1].path.split('/').pop());

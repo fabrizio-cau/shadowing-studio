@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { MIN_SEGMENT_SECONDS, sameBounds, validateSegment } from '../src/shared/segment';
-import { formatClock, formatSegmentLength, formatTimestamp, parseTimestamp } from '../src/shared/time';
+import { formatClock, formatSegmentLength, formatTimestamp, parseTimestamp, toWholeSeconds } from '../src/shared/time';
 
 describe('parseTimestamp', () => {
   it.each([
@@ -30,24 +30,34 @@ describe('parseTimestamp', () => {
 
 describe('formatTimestamp', () => {
   it.each([
-    [0, '00:00:00.000'],
-    [1.5, '00:00:01.500'],
-    [59.9996, '00:01:00.000'],
-    [3723.456, '01:02:03.456'],
-    [360000, '100:00:00.000'],
-  ])('formats %d', (input, expected) => {
+    [0, '00:00:00'],
+    [1.4, '00:00:01'],
+    [1.5, '00:00:02'],
+    [59.6, '00:01:00'],
+    [3723.456, '01:02:03'],
+    [360000, '100:00:00'],
+  ])('formats %d as HH:MM:SS', (input, expected) => {
     expect(formatTimestamp(input)).toBe(expected);
   });
 
-  it('handles invalid input', () => {
-    expect(formatTimestamp(NaN)).toBe('00:00:00.000');
-    expect(formatTimestamp(-1)).toBe('00:00:00.000');
-    expect(formatTimestamp(Infinity)).toBe('00:00:00.000');
+  it('rounds segment starts down and ends up, so a sentence is never clipped', () => {
+    expect(formatTimestamp(83.9, 'floor')).toBe('00:01:23');
+    expect(formatTimestamp(83.1, 'ceil')).toBe('00:01:24');
+    expect(formatTimestamp(83, 'ceil')).toBe('00:01:23');
+    // Float noise must not push an exact second to the next one.
+    expect(toWholeSeconds(4.0000001, 'ceil')).toBe(4);
+    expect(toWholeSeconds(3.9999999, 'floor')).toBe(4);
   });
 
-  it('round-trips with parseTimestamp', () => {
-    for (const t of [0, 0.001, 1.234, 61.5, 3599.999, 7322.01]) {
-      expect(parseTimestamp(formatTimestamp(t))).toBeCloseTo(t, 3);
+  it('handles invalid input', () => {
+    expect(formatTimestamp(NaN)).toBe('00:00:00');
+    expect(formatTimestamp(-1)).toBe('00:00:00');
+    expect(formatTimestamp(Infinity)).toBe('00:00:00');
+  });
+
+  it('round-trips whole seconds with parseTimestamp', () => {
+    for (const t of [0, 1, 61, 3599, 7322]) {
+      expect(parseTimestamp(formatTimestamp(t))).toBe(t);
     }
   });
 });
