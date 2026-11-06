@@ -34,14 +34,20 @@ function sample(x, y) {
   return ring || d < 0.13 ? 2 : 1;
 }
 
-function png(size) {
+/**
+ * `pad` is transparent padding per side in pixels: the 128 px icon doubles as the Chrome Web Store
+ * icon, whose artwork should be 96×96 with 16 px of transparent padding.
+ */
+function png(size, pad = 0) {
+  const art = size - 2 * pad;
   const ss = 4, raw = Buffer.alloc((size * 4 + 1) * size);
   for (let y = 0; y < size; y++) {
     raw[y * (size * 4 + 1)] = 0;
     for (let x = 0; x < size; x++) {
       let a = 0, fg = 0;
       for (let sy = 0; sy < ss; sy++) for (let sx = 0; sx < ss; sx++) {
-        const s = sample((x + (sx + 0.5) / ss) / size, (y + (sy + 0.5) / ss) / size);
+        const u = (x - pad + (sx + 0.5) / ss) / art, v = (y - pad + (sy + 0.5) / ss) / art;
+        const s = u < 0 || u > 1 || v < 0 || v > 1 ? 0 : sample(u, v);
         if (s) a++;
         if (s === 2) fg++;
       }
@@ -60,5 +66,6 @@ function png(size) {
 }
 
 mkdirSync('public/icons', { recursive: true });
-for (const s of [16, 32, 48, 128]) writeFileSync(`public/icons/icon${s}.png`, png(s));
+for (const s of [16, 32, 48]) writeFileSync(`public/icons/icon${s}.png`, png(s));
+writeFileSync('public/icons/icon128.png', png(128, 16));
 console.log('icons written');

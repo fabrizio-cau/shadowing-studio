@@ -91,10 +91,11 @@ See [ARCHITECTURE.md](ARCHITECTURE.md) for the design, data flow and trade-offs.
 
 ## Publishing to the Chrome Web Store
 
-[`store/LISTING.md`](store/LISTING.md) has everything the Developer Dashboard asks for: the listing text,
-the single-purpose statement, a justification for each permission, the data-usage answers and a
-pre-submit checklist. The privacy policy is [`PRIVACY.md`](PRIVACY.md), and the screenshots and promo
-tiles are in `store/`. To publish: `npm run package`, then upload the zip.
+[`store/PUBLISHING.md`](store/PUBLISHING.md) walks through the whole process: developer account,
+package, pre-flight checks, each dashboard tab, review, and updates. [`store/LISTING.md`](store/LISTING.md)
+has everything to paste into the Developer Dashboard: the listing text, the single-purpose statement, a
+justification for each permission, the data-usage answers and notes for the reviewer. The privacy policy
+is [`PRIVACY.md`](PRIVACY.md), and the screenshots and promo tiles are in `store/`.
 
 ## Permissions
 

@@ -1,13 +1,9 @@
 # Chrome Web Store submission kit
 
 Everything you paste into the [Developer Dashboard](https://chrome.google.com/webstore/devconsole), field by field.
+For the whole process (account, upload, review, updates), follow [`PUBLISHING.md`](PUBLISHING.md).
 
-## Upload
-
-1. `npm run package` builds the extension and writes `release/shadowing-studio-<version>.zip`.
-2. Dashboard → **Items → New item** → upload that zip.
-3. For updates, raise `version` in `public/manifest.json` (e.g. `1.0.1`), run `npm run package` again
-   and upload the new zip on the item's **Package** tab.
+The package to upload: `npm run package` → `release/shadowing-studio-<version>.zip`.
 
 ---
 
@@ -19,8 +15,9 @@ Everything you paste into the [Developer Dashboard](https://chrome.google.com/we
 
 > Loop any YouTube sentence, record your shadowing attempts, compare them and keep a local practice library.
 
-**Category**: Education → (sub-category, if offered) Language learning
+**Category**: Education (in the *Productivity* group; there is no separate language-learning category)
 **Language**: English
+**Mature content**: off
 
 **Description**:
 
@@ -63,13 +60,18 @@ Shadowing Studio is an independent project and is not affiliated with or endorse
 
 | Field | File | Size |
 | --- | --- | --- |
-| Store icon | `public/icons/icon128.png` | 128×128 |
+| Store icon | `public/icons/icon128.png` (96×96 artwork + 16 px transparent padding, as Google recommends) | 128×128 |
 | Screenshot 1 | `store/screenshot-1-practice.png` | 1280×800 |
 | Screenshot 2 | `store/screenshot-2-recordings.png` | 1280×800 |
 | Screenshot 3 | `store/screenshot-3-library.png` | 1280×800 |
+| Screenshot 4 | `store/screenshot-4-listen-repeat.png` | 1280×800 |
 | Small promo tile | `store/promo-small-440x280.png` | 440×280 |
 | Marquee (optional) | `store/promo-marquee-1400x560.png` | 1400×560 |
 
+Upload the screenshots in this order: the first one is the listing's main image.
+All images are 24-bit PNG without transparency, as the store expects.
+
+**YouTube video** (optional): leave empty.
 **Official URL**: none (it requires a verified domain).
 **Homepage URL**: `https://github.com/fabrizio-cau/shadowing-studio`
 **Support URL**: `https://github.com/fabrizio-cau/shadowing-studio/issues`
@@ -127,6 +129,20 @@ https://github.com/fabrizio-cau/shadowing-studio/blob/main/PRIVACY.md
 
 ---
 
+## Test instructions tab
+
+Optional, but it helps the reviewer. Paste:
+
+```
+No account or login is needed.
+1. Open any YouTube video (for example https://www.youtube.com/watch?v=jNQXAC9IVRw) and click the Shadowing Studio toolbar icon: the side panel opens.
+2. Press the target buttons next to Start and End while the video plays (or type 00:00:02 and 00:00:05), then turn on "Loop segment".
+3. Click "Enable microphone" and allow the microphone, then press Record. The attempt appears in the Recordings tab.
+Microphone audio is only recorded while the user records, and is stored locally in IndexedDB. Nothing is sent over the network.
+```
+
+---
+
 ## Distribution tab
 
 - **Visibility**: start with *Unlisted* to test the store build with a few people, then switch to *Public*.
@@ -135,11 +151,4 @@ https://github.com/fabrizio-cau/shadowing-studio/blob/main/PRIVACY.md
 
 ## Before you press "Submit for review"
 
-- [ ] Run the manual checklist in the README (the real side panel, Chrome's microphone prompt, a real
-      microphone with headphones, ads). Automation could not cover these.
-- [ ] Load `release/shadowing-studio-<version>.zip` unpacked once (unzip, then *Load unpacked*) to
-      check the exact build you upload.
-- [ ] The GitHub repository is **public**, so the privacy-policy and support links open for reviewers.
-- [ ] The version in the manifest is higher than any version uploaded before.
-
-Review usually takes a few days, sometimes up to a few weeks for a first submission.
+See the pre-submit checklist in [`PUBLISHING.md`](PUBLISHING.md#3-pre-flight-checks).

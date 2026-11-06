@@ -1,6 +1,6 @@
 // Generates Chrome Web Store graphics into store/:
 //   npm run build && npm run store-assets
-// - three 1280×800 screenshots: the YouTube tab (880 px) with the side panel (400 px) beside it,
+// - four 1280×800 screenshots: the YouTube tab (880 px) with the side panel (400 px) beside it,
 //   captured from a real session with real recordings (Chrome's fake microphone);
 // - promo tiles (440×280 and 1400×560) rendered from HTML.
 // Env: E2E_VIDEO to use another video, E2E_HEADED=1 to watch.
@@ -90,6 +90,13 @@ try {
   await panel.getByText('0 attempts').waitFor();
   await compose(yt, panel, 'screenshot-3-library.png');
 
+  // 4. Listen & repeat: the segment played once and paused; the user's turn to record.
+  await panel.getByRole('tab', { name: 'Practice' }).click();
+  await panel.getByRole('radio', { name: 'Listen & repeat' }).click();
+  await panel.getByRole('button', { name: 'Listen', exact: true }).click();
+  await panel.getByText('Your turn — record your imitation.').waitFor({ timeout: 15_000 });
+  await compose(yt, panel, 'screenshot-4-listen-repeat.png', { scrollToBottom: true });
+
   // Promo tiles.
   const icon = `data:image/png;base64,${readFileSync('public/icons/icon128.png').toString('base64')}`;
   await renderTile(440, 280, 'promo-small-440x280.png', icon, false);
@@ -134,13 +141,15 @@ async function renderTile(width, height, file, icon, large) {
     body{font-family:'Segoe UI',system-ui,-apple-system,Roboto,sans-serif;background:linear-gradient(135deg,#4f46e5 0%,#3730a3 100%);color:#fff;
       display:flex;align-items:center;gap:${24 * s}px;padding:0 ${36 * s}px;box-sizing:border-box}
     .logo{background:#fff;border-radius:${20 * s}px;padding:${8 * s}px;box-shadow:0 ${6 * s}px ${20 * s}px rgb(0 0 0/.25);flex:none;display:flex}
-    img{width:${64 * s}px;height:${64 * s}px}
+    .art{width:${64 * s}px;height:${64 * s}px;overflow:hidden;position:relative}
+    /* icon128.png has 16 px of transparent padding (store icon guideline); show only the artwork. */
+    img{position:absolute;width:${(64 * s * 128) / 96}px;height:${(64 * s * 128) / 96}px;left:${(-64 * s * 16) / 96}px;top:${(-64 * s * 16) / 96}px}
     h1{margin:0 0 ${8 * s}px;font-size:${30 * s}px;line-height:1.1;font-weight:700;letter-spacing:-.01em}
     p{margin:0;font-size:${15 * s}px;line-height:1.35;color:#e0e7ff;max-width:${large ? 720 : 260}px}
     .steps{margin-top:${12 * s}px;display:flex;gap:${8 * s}px;flex-wrap:wrap}
     .steps span{font-size:${11 * s}px;font-weight:600;background:rgb(255 255 255/.16);border-radius:999px;padding:${3 * s}px ${9 * s}px}
   </style>
-  <div class="logo"><img src="${icon}"></div><div>
+  <div class="logo"><div class="art"><img src="${icon}"></div></div><div>
     <h1>Shadowing Studio</h1>
     <p>Loop any sentence on YouTube, record yourself and compare.</p>
     <div class="steps"><span>Loop</span><span>Record</span><span>Compare</span>${large ? '<span>Private, on your device</span>' : ''}</div>
