@@ -13,15 +13,17 @@ practice library. No account, no cloud: recordings stay on your computer.
 - **Looping**: replays the segment indefinitely, at any playback speed, without fighting YouTube's
   own controls. Looping keeps running if you close the panel.
 - **Two practice modes**
-  - *Shadowing*: speak along while the segment loops. *Record attempt* restarts the segment and
-    records your microphone (by default it stops at the end of the segment).
+  - *Shadowing*: speak along while the segment loops. *Record* restarts the segment and
+    records your microphone. By default it stops at the end of the segment; with auto-stop off the
+    segment keeps looping until you press *Stop recording*. Either way the video pauses when the
+    recording ends.
   - *Listen & repeat*: *Listen* plays the segment once and pauses; then *Record* your imitation;
     *Listen again* for the next try.
 - **Attempts**: unlimited independent recordings per segment, each with attempt number, date, time and
   duration. You can rename them, add notes, delete them and play them; *Play original* replays the
   YouTube segment so you can compare by ear.
 - **Library**: organised by Language → Video → Segment (languages and videos in alphabetical order,
-  segments without a language last under *Unsorted*), with language and video filters. *Practice*
+  segments without a language last under *Unsorted*; segments in the order they were created, #1, #2…), with language and video filters. *Practice*
   reopens the video at the segment and restores it.
 - **Export** to `Downloads/Shadowing Studio/<Language>/<Video>/`, e.g.
   `2026-11-06_14-03-09_My-Video_Segment01_Attempt02.webm`. You can export one attempt, a whole segment
@@ -147,7 +149,7 @@ a REC badge on the toolbar icon show it is active.
 - `filename.test.ts`: sanitisation, reserved names, export paths, de-duplication, `info.json`.
 
 `npm run test:e2e` drives your installed Chrome (via `playwright-core`; no browser download) against a real
-YouTube video with Chrome's **fake microphone**. It runs 36 checks, all passing on the last run: install,
+YouTube video with Chrome's **fake microphone**. It runs 39 checks, all passing on the last run: install,
 connect, timestamps, loop bounds at 0.5×/1×/2×, loop off, REC badge, shadowing auto-stop, listen & repeat
 pause and record, decoded WebM/Opus audio with a duration header, playback, rename, attempt highlighting, play original, toasts, export folder
 structure, delete, SPA navigation, no console errors, **library and recordings after restarting Chrome**,
@@ -168,13 +170,13 @@ Run this once per release in a normal Chrome profile:
    reconnects.
 3. **Old tab**: with a YouTube tab open, reload the extension in `chrome://extensions`. The panel shows
    *Reload tab*; click it and it reconnects.
-4. **Microphone permission**: click *Enable microphone* or *Record attempt*. Allow it in the prompt, or in
+4. **Microphone permission**: click *Enable microphone* or *Record*. Allow it in the prompt, or in
    the helper tab if one opens. The chip shows *Microphone ready*. Block it in site settings: the panel
    shows *Microphone access is blocked* with *Open settings*.
 5. **Segment and loop**: set start/end with ⌖ while playing; type an invalid end (before the start) and
    see the error. Turn on *Loop segment*, watch it at 0.5×, 1× and 2× (YouTube's speed menu) for a few
    passes; pause and resume from the YouTube controls; seek outside the segment (it snaps back).
-6. **Shadowing**: with headphones, *Record attempt*. The REC chip, timer, the browser's mic indicator and
+6. **Shadowing**: with headphones, *Record*. The REC chip, timer, the browser's mic indicator and
    the toolbar badge all show; it stops at the segment end. Record a second attempt: both are listed.
 7. **Listen & repeat**: *Listen*: it pauses at the end and shows *Your turn*. *Record*, speak, *Stop
    recording*. *Listen again* works.

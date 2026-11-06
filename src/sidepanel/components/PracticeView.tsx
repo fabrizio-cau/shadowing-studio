@@ -242,8 +242,8 @@ function SegmentCard(p: PracticeViewProps & { player: PlayerState }) {
           <Icon name="save" /> {p.saveState === 'modified' ? 'Update' : 'Save'}
         </button>
         <span className="grow" />
-        <button type="button" className="btn btn-ghost" onClick={p.onReset} disabled={empty || busy} title="Clear the times to start a new segment">
-          New
+        <button type="button" className="btn" onClick={p.onReset} disabled={empty || busy} title="Clear the times to start a new segment">
+          <Icon name="plus" /> New
         </button>
       </div>
       {p.videoSegments.length > 0 && (
@@ -332,11 +332,11 @@ function RecordCard(p: PracticeViewProps) {
           <div className="row nowrap">
             {recording ? (
               <button type="button" className="btn btn-record recording" onClick={p.onStop}>
-                <Icon name="stop" /> Stop attempt
+                <Icon name="stop" /> Stop recording
               </button>
             ) : (
               <button type="button" className="btn btn-primary btn-record" onClick={p.onRecord} disabled={!canRecord}>
-                <Icon name="mic" /> {busy ? (p.recorderStatus === 'starting' ? 'Starting…' : 'Saving…') : 'Record attempt'}
+                <Icon name="mic" /> {busy ? (p.recorderStatus === 'starting' ? 'Starting…' : 'Saving…') : 'Record'}
               </button>
             )}
           </div>
@@ -361,9 +361,11 @@ function RecordCard(p: PracticeViewProps) {
 function RepeatControls(p: PracticeViewProps & { canRecord: boolean; busy: boolean; recording: boolean }) {
   if (p.recording) {
     return (
-      <button type="button" className="btn btn-record recording" onClick={p.onStop}>
-        <Icon name="stop" /> Stop recording
-      </button>
+      <div className="row nowrap">
+        <button type="button" className="btn btn-record recording" onClick={p.onStop}>
+          <Icon name="stop" /> Stop recording
+        </button>
+      </div>
     );
   }
   const step = p.phase === 'listening' ? 'Listening…' : p.phase === 'your-turn' ? 'Your turn — record your imitation.' : p.phase === 'done' ? 'Saved. Listen again or record another attempt.' : 'Step 1: listen. Step 2: record.';

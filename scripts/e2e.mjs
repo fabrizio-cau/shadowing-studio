@@ -137,7 +137,7 @@ try {
   check('Turning the loop off lets playback continue past the end', s.max > 5.2, JSON.stringify(s));
 
   // Shadowing: record with auto-stop at the segment end.
-  await panel.getByRole('button', { name: 'Record attempt' }).click();
+  await panel.getByRole('button', { name: 'Record', exact: true }).click();
   await panel.getByText('REC', { exact: true }).waitFor({ timeout: 10_000 });
   await shot(panel, '00-recording');
   const badge = await panel.evaluate(() => chrome.action.getBadgeText({}));
@@ -150,9 +150,10 @@ try {
     if (!cleared) await panel.waitForTimeout(250);
   }
   check('Badge clears after recording', cleared);
-  await panel.getByRole('button', { name: 'Record attempt' }).click();
+  await panel.getByRole('button', { name: 'Record', exact: true }).click();
   await panel.getByText('Attempt 2 saved.').waitFor({ timeout: 15_000 });
   check('Second independent attempt saved', true);
+  check('Video pauses when an auto-stopped attempt ends', await yt.evaluate(() => document.querySelector('video.html5-main-video').paused));
   const cardTop = async () => (await panel.locator('main .card').first().boundingBox()).y;
   const topWithToast = await cardTop();
   const closed = await panel.locator('.toast-region .banner').waitFor({ state: 'detached', timeout: 5000 }).then(() => true, () => false);
@@ -226,6 +227,24 @@ try {
   await panel.getByRole('button', { name: 'Delete', exact: true }).click();
   await panel.waitForFunction(() => document.querySelectorAll('[role=listitem]').length === 2);
   check('Deleting an attempt keeps the others', true);
+
+  // Shadowing without auto-stop: loops while recording, pauses as soon as recording stops.
+  await panel.getByRole('tab', { name: 'Practice' }).click();
+  await panel.getByRole('radio', { name: 'Shadowing' }).click();
+  await panel.getByLabel('Stop automatically at the end of the segment').uncheck();
+  await panel.getByRole('button', { name: 'Record', exact: true }).click();
+  await panel.getByRole('button', { name: 'Stop recording' }).waitFor();
+  s = await sample(yt, 4500);
+  check('Without auto-stop, the segment keeps looping while recording', s.wraps >= 1 && s.min >= 1.95 && s.max <= 5.2 && (await panel.getByRole('button', { name: 'Stop recording' }).isVisible()), JSON.stringify(s));
+  await panel.getByRole('button', { name: 'Stop recording' }).click();
+  await panel.getByText(/Attempt \d+ saved\./).waitFor({ timeout: 10_000 });
+  check('Video pauses when the recording is stopped', await yt.evaluate(() => document.querySelector('video.html5-main-video').paused));
+  await panel.getByLabel('Stop automatically at the end of the segment').check();
+  // Remove that extra attempt so later checks keep their counts.
+  await panel.getByRole('tab', { name: /Recordings/ }).click();
+  await panel.getByRole('button', { name: /^Delete / }).first().click();
+  await panel.getByRole('button', { name: 'Delete', exact: true }).click();
+  await panel.waitForFunction(() => document.querySelectorAll('[role=listitem]').length === 2);
 
   // SPA navigation to another video.
   const otherHref = await yt.evaluate((current) => {

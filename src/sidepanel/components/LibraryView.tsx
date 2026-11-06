@@ -78,7 +78,7 @@ export function LibraryView(p: LibraryViewProps) {
       .map(([lang, videos]) => ({
         language: lang,
         videos: [...videos.values()]
-          .map((v) => ({ ...v, segments: v.segments.sort((a, b) => a.start - b.start) }))
+          .map((v) => ({ ...v, segments: v.segments.sort((a, b) => a.number - b.number) }))
           .sort((a, b) => byTitle(a.title, b.title)),
       }));
   }, [segments, language, videoId]);

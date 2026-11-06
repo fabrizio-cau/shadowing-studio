@@ -30,6 +30,7 @@ const ICONS = {
   reload: <path d="M20 11a8 8 0 1 0-2.3 5.7M20 4v7h-7" />,
   ear: <path d="M6 9a6 6 0 1 1 12 0c0 3-2 4-3 5.5S14 18 12 20a3 3 0 0 1-4-1M10 9a2 2 0 1 1 4 0" />,
   save: <path d="M5 4h11l3 3v13H5zM8 4v5h7V4M8 20v-6h8v6" />,
+  plus: <path d="M12 5v14M5 12h14" />,
   notes: <path d="M5 4h14v16H5zM8 9h8M8 13h8M8 17h5" />,
 } as const;
 

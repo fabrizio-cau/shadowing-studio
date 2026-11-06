@@ -45,7 +45,7 @@ try {
 
   await setSegment('00:00:02', '00:00:05');
   for (const n of [1, 2]) {
-    await panel.getByRole('button', { name: 'Record attempt' }).click();
+    await panel.getByRole('button', { name: 'Record', exact: true }).click();
     await panel.getByText(`Attempt ${n} saved.`).waitFor({ timeout: 15_000 });
   }
   await toastGone();
@@ -58,11 +58,11 @@ try {
 
   // 1. Practice: looping, mid-recording.
   await setLoop(true);
-  await panel.getByRole('button', { name: 'Record attempt' }).click();
+  await panel.getByRole('button', { name: 'Record', exact: true }).click();
   await panel.getByText('REC', { exact: true }).waitFor();
   await panel.waitForTimeout(1600);
   await compose(yt, panel, 'screenshot-1-practice.png', { scrollToBottom: true });
-  await panel.getByRole('button', { name: 'Stop attempt' }).click();
+  await panel.getByRole('button', { name: 'Stop recording' }).click();
   await panel.getByText('Attempt 3 saved.').waitFor({ timeout: 10_000 });
   await setLoop(false);
   await yt.evaluate(() => document.querySelector('video.html5-main-video').pause());

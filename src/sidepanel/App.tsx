@@ -75,6 +75,8 @@ export function App() {
   const connRef = useRef<PlayerConnection | null>(null);
   const pendingRef = useRef<Segment | null>(null);
   const autoStopRef = useRef(false);
+  /** True while a shadowing attempt drives the video; when that recording ends, the video pauses. */
+  const shadowPlaybackRef = useRef(false);
 
   const send = useCallback((cmd: PlayerCommand) => connRef.current?.send(cmd) ?? false, []);
   const attemptPlayer = useAttemptPlayer(() => {
@@ -93,7 +95,14 @@ export function App() {
         fixDuration,
       },
       {
-        onStatus: setRecStatus,
+        onStatus: (status) => {
+          setRecStatus(status);
+          // However the attempt ended (Stop, auto-stop, error), stop the looping video with it.
+          if (status === 'idle' && shadowPlaybackRef.current) {
+            shadowPlaybackRef.current = false;
+            connRef.current?.send({ type: 'pause' });
+          }
+        },
         onSaved: (rec) => live.current.onSaved(rec),
         onError: (err) => setNotice({ tone: 'error', text: err.message }),
         onUnsaved: (blob, mimeType, err) => {
@@ -315,6 +324,7 @@ export function App() {
     }
     if (shadowing) {
       autoStopRef.current = settings.autoStop;
+      shadowPlaybackRef.current = true;
       send({ type: 'playSegment', mode: 'loop' });
     }
   }

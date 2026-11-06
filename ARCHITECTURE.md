@@ -125,9 +125,10 @@ typed message contracts (`messages.ts`) that both ends of each port import.
 
 ## Practice modes
 
-* **Shadowing (simultaneous)**: *Record attempt* starts the recorder, then seeks to the segment
+* **Shadowing (simultaneous)**: *Record* starts the recorder, then seeks to the segment
   start and plays with the loop on. With *auto-stop* (default) the attempt ends when the segment
-  ends; otherwise the user stops it. Only the microphone is recorded; headphones are recommended
+  ends; otherwise it loops until the user stops it. The video pauses whenever the attempt ends
+  (stop, auto-stop or an error). Only the microphone is recorded; headphones are recommended
   so the speakers don't leak into the mic.
 * **Listen & repeat**: *Listen* plays the segment once (`once` mode pauses at the end). The panel
   then prompts *Record imitation*; after stopping, *Listen again* restarts the cycle.
