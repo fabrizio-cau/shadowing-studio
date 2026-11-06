@@ -1,0 +1,22 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Shadowing Studio — Microphone access</title>
+    <link rel="icon" href="../icons/icon32.png" />
+  </head>
+  <body>
+    <main class="permission">
+      <img src="../icons/icon48.png" alt="" width="40" height="40" />
+      <h1>Allow microphone access</h1>
+      <p>
+        Shadowing Studio records <strong>only your microphone</strong> while you press record. Audio stays on this
+        computer; nothing is uploaded.
+      </p>
+      <button id="grant" class="btn btn-primary" type="button">Allow microphone</button>
+      <p id="status" class="permission-status" role="status" aria-live="polite"></p>
+    </main>
+    <script type="module" src="./main.ts"></script>
+  </body>
+</html>
